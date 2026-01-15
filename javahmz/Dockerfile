@@ -1,28 +1,25 @@
-# Use official Java 17 runtime (lightweight Alpine version)
+# Use official Java 17 image
 FROM eclipse-temurin:17-jdk-alpine
 
-# Set working directory
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy Maven wrapper and config (no javahmz/ prefix - Render is already in javahmz folder)
+# Copy Maven wrapper and config
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
-# Make mvnw executable (important!)
-RUN chmod +x mvnw
-
-# Download dependencies (cache layer)
+# Download dependencies (cached layer)
 RUN ./mvnw dependency:go-offline -B
 
 # Copy source code
 COPY src src
 
-# Build the application
+# Build the Spring Boot application
 RUN ./mvnw clean package -DskipTests
 
-# Expose Spring Boot default port
+# Expose Spring Boot port
 EXPOSE 8080
 
-# Run the Spring Boot application
-CMD ["java", "-jar", "target/*.jar"]
+# Run the application
+CMD ["sh", "-c", "java -jar target/*.jar"]
