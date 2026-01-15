@@ -1,5 +1,5 @@
-# Use official Java runtime
-FROM openjdk:17-jdk-slim
+# Use official Java 17 runtime (updated tag)
+FROM eclipse-temurin:17-jdk-alpine
 
 # Set working directory
 WORKDIR /app
@@ -9,7 +9,7 @@ COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
-# Download dependencies
+# Download dependencies (cache layer)
 RUN ./mvnw dependency:go-offline -B
 
 # Copy source code
