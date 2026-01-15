@@ -1,0 +1,21 @@
+# Java/Spring Boot
+javahmz/target/
+*.jar
+*.war
+*.class
+.mvn/
+mvnw
+mvnw.cmd
+.idea/
+*.iml
+
+# React/Node
+node_modules/
+.env
+build/
+dist/
+
+# General
+.DS_Store
+*.log
+temp/

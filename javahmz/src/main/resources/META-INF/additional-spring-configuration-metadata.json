@@ -1,0 +1,97 @@
+{"properties": [
+  {
+    "name": "spring.datasource.url",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.url'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.password",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.password'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.h2.console.path",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.h2.console.path'"
+  },
+  {
+    "name": "spring.jpa.properties.hibernate.format_sql",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jpa.properties.hibernate.format_sql'"
+  },
+  {
+    "name": "spring.jpa.show-sql",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jpa.show-sql'"
+  },
+  {
+    "name": "spring.jpa.hibernate.ddl-auto",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jpa.hibernate.ddl-auto'"
+  },
+  {
+    "name": "spring.jpa.database-platform",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jpa.database-platform'"
+  },
+  {
+    "name": "spring.h2.console.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.h2.console.enabled'"
+  },
+  {
+    "name": "spring.datasource.username",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.username'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.driverClassName",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driverClassName'"
+  },
+  {
+    "name": "spring.datasource.driver-class-name",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.driver-class-name'"
+  }
+]}
