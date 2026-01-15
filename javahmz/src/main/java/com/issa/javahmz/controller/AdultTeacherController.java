@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")  // ← ADDED: Allows all origins (Vercel frontend, etc.)
 @RestController
 @RequestMapping("/api/adult-teachers")
 public class AdultTeacherController {
