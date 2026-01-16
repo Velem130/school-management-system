@@ -2,21 +2,21 @@ import { NavLink } from "react-router-dom";
 
 function Sidebar() {
   const baseClass =
-    "block p-2 rounded-md transition hover:bg-emerald-800";
+    "block p-2 md:p-3 rounded-md transition hover:bg-emerald-800 text-sm md:text-base";
   const activeClass =
     "bg-emerald-700 font-semibold";
 
   return (
-    <div className="w-64 h-screen bg-emerald-900 text-white fixed p-6">
-      <h1 className="text-xl font-bold mb-8 border-b border-emerald-700 pb-4">
+    <div className="w-full md:w-64 h-auto md:h-screen bg-emerald-900 text-white p-4 md:p-6">
+      <h1 className="text-lg md:text-xl font-bold mb-4 md:mb-8 border-b border-emerald-700 pb-3 md:pb-4">
         BBIC Management
       </h1>
 
-      <nav className="space-y-4">
+      <nav className="flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible space-x-2 md:space-x-0 md:space-y-3 md:space-y-4">
         <NavLink
           to="/"
           className={({ isActive }) =>
-            `${baseClass} ${isActive ? activeClass : ""}`
+            `${baseClass} whitespace-nowrap ${isActive ? activeClass : ""}`
           }
         >
           Dashboard
@@ -25,7 +25,7 @@ function Sidebar() {
         <NavLink
           to="/students"
           className={({ isActive }) =>
-            `${baseClass} ${isActive ? activeClass : ""}`
+            `${baseClass} whitespace-nowrap ${isActive ? activeClass : ""}`
           }
         >
           Student Roll
@@ -34,7 +34,7 @@ function Sidebar() {
         <NavLink
           to="/ustaads"
           className={({ isActive }) =>
-            `${baseClass} ${isActive ? activeClass : ""}`
+            `${baseClass} whitespace-nowrap ${isActive ? activeClass : ""}`
           }
         >
           Ustaads
@@ -43,7 +43,7 @@ function Sidebar() {
         <NavLink
           to="/adult-classes"
           className={({ isActive }) =>
-            `${baseClass} ${isActive ? activeClass : ""}`
+            `${baseClass} whitespace-nowrap ${isActive ? activeClass : ""}`
           }
         >
           Adult Classes
@@ -52,7 +52,7 @@ function Sidebar() {
         <NavLink
           to="/menlist"
           className={({ isActive }) =>
-            `${baseClass} ${isActive ? activeClass : ""}`
+            `${baseClass} whitespace-nowrap ${isActive ? activeClass : ""}`
           }
         >
           Men's List

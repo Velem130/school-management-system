@@ -336,25 +336,25 @@ function AdultClasses() {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Adult Classes</h1>
+    <div className="p-4 md:p-8">
+      <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Adult Classes</h1>
 
       {/* Teacher registration/update form */}
       {(!currentTeacher || editingTeacherId) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
           {/* Left side: Teacher Registration/Update */}
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h2 className="font-semibold mb-4 text-lg">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+            <h2 className="font-semibold mb-3 md:mb-4 text-lg">
               {editingTeacherId ? "Update Adult Ustaadh" : "New Adult Ustaadh Registration"}
             </h2>
-            <div className="grid grid-cols-1 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-3 md:gap-4 mb-3 md:mb-4">
               <input
                 placeholder="Adult Ustaadh Name *"
                 value={formTeacher.name}
                 onChange={(e) =>
                   setFormTeacher({ ...formTeacher, name: e.target.value })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <input
                 placeholder="Class Teaching *"
@@ -365,11 +365,11 @@ function AdultClasses() {
                     classTeaching: e.target.value,
                   })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
             </div>
             {!editingTeacherId && (
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-3 md:mb-4">
                 <input
                   type="checkbox"
                   id="newTeacher"
@@ -377,12 +377,12 @@ function AdultClasses() {
                   onChange={(e) => setIsNewTeacher(e.target.checked)}
                   className="mr-2"
                 />
-                <label htmlFor="newTeacher" className="text-sm text-gray-600">
+                <label htmlFor="newTeacher" className="text-xs md:text-sm text-gray-600">
                   I am a new Adult Ustaadh (register me)
                 </label>
               </div>
             )}
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
               {editingTeacherId 
                 ? "Update the Ustaadh details below"
                 : isNewTeacher 
@@ -390,11 +390,11 @@ function AdultClasses() {
                   : "Access your existing class by entering exact name and class."
               }
             </p>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <button
                 onClick={editingTeacherId ? handleUpdateTeacher : handleAddTeacher}
                 disabled={loading}
-                className="bg-emerald-700 text-white px-4 py-2 rounded hover:bg-emerald-800 flex-1 disabled:opacity-50"
+                className="bg-emerald-700 text-white px-4 py-2 rounded hover:bg-emerald-800 flex-1 disabled:opacity-50 text-sm md:text-base"
               >
                 {loading ? "Processing..." : editingTeacherId ? "Update Ustaadh" : isNewTeacher ? "Register & Continue" : "Access My Class"}
               </button>
@@ -404,7 +404,7 @@ function AdultClasses() {
                     setEditingTeacherId(null);
                     setFormTeacher({ name: "", classTeaching: "" });
                   }}
-                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 text-sm md:text-base"
                 >
                   Cancel
                 </button>
@@ -414,14 +414,14 @@ function AdultClasses() {
 
           {/* Right side: Existing Teachers List (only when not editing) */}
           {!editingTeacherId && (
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h2 className="font-semibold mb-4 text-lg">Access Existing Adult Ustaadh</h2>
-              <p className="text-sm text-gray-500 mb-4">Select your name to access your class:</p>
-              <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+              <h2 className="font-semibold mb-3 md:mb-4 text-lg">Access Existing Adult Ustaadh</h2>
+              <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">Select your name to access your class:</p>
+              <div className="space-y-2 md:space-y-3 max-h-60 md:max-h-80 overflow-y-auto">
                 {loading ? (
                   <div className="text-center py-4">
                     <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-emerald-500"></div>
-                    <p className="mt-2 text-gray-600">Loading teachers...</p>
+                    <p className="mt-2 text-gray-600 text-sm">Loading teachers...</p>
                   </div>
                 ) : (
                   <>
@@ -430,15 +430,15 @@ function AdultClasses() {
                       return (
                         <div 
                           key={t.id} 
-                          className="border p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                          className="border p-2 md:p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
                           onClick={() => selectExistingTeacher(t)}
                         >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <div className="font-medium">{t.name}</div>
-                              <div className="text-sm text-gray-600">Class: {t.classTeaching}</div>
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0">
+                            <div className="flex-1">
+                              <div className="font-medium text-sm md:text-base">{t.name}</div>
+                              <div className="text-xs md:text-sm text-gray-600">Class: {t.classTeaching}</div>
                             </div>
-                            <div className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                            <div className="text-xs md:text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded">
                               {studentCount} learner{studentCount !== 1 ? 's' : ''}
                             </div>
                           </div>
@@ -446,14 +446,14 @@ function AdultClasses() {
                       );
                     })}
                     {teachers.length === 0 && !loading && (
-                      <div className="text-center text-gray-500 py-4">
+                      <div className="text-center text-gray-500 py-4 text-sm">
                         No adult ustaadhs registered yet
                       </div>
                     )}
                   </>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-4">
+              <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
                 Click on your name above to quickly access your class
               </p>
             </div>
@@ -464,18 +464,18 @@ function AdultClasses() {
       {/* Step 2: Add Adult Learners */}
       {currentTeacher && !editingTeacherId && (
         <>
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-8">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm mb-6 md:mb-8">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
               <div>
-                <h2 className="font-semibold text-lg">
+                <h2 className="font-semibold text-base md:text-lg">
                   {editingId ? "Update Adult Learner" : "Add Adult Learner"} – {currentTeacher.classTeaching}
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs md:text-sm text-gray-500">
                   {isNewTeacher ? "New ustaadh mode" : "Existing ustaadh mode"}
                 </p>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium">
+              <div className="flex items-center space-x-2 md:space-x-4">
+                <div className="bg-emerald-100 text-emerald-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                   Adult Learners: {getStudentCountForTeacher(currentTeacher.name)}
                 </div>
                 <button
@@ -483,14 +483,14 @@ function AdultClasses() {
                     setCurrentTeacher(null);
                     setFormTeacher({ name: "", classTeaching: "" });
                   }}
-                  className="text-gray-600 hover:text-gray-800 text-sm"
+                  className="text-gray-600 hover:text-gray-800 text-xs md:text-sm"
                 >
                   Switch Ustaadh
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
               <input
                 placeholder="ID Number *"
                 value={formStudent.studentId}
@@ -500,7 +500,7 @@ function AdultClasses() {
                     studentId: e.target.value,
                   })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <input
                 placeholder="Full Name *"
@@ -508,14 +508,14 @@ function AdultClasses() {
                 onChange={(e) =>
                   setFormStudent({ ...formStudent, name: e.target.value })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <select
                 value={formStudent.gender}
                 onChange={(e) =>
                   setFormStudent({ ...formStudent, gender: e.target.value })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               >
                 <option value="">Gender *</option>
                 <option value="Male">Male</option>
@@ -530,7 +530,7 @@ function AdultClasses() {
                     dateJoined: e.target.value,
                   })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <input
                 placeholder="Location *"
@@ -538,7 +538,7 @@ function AdultClasses() {
                 onChange={(e) =>
                   setFormStudent({ ...formStudent, location: e.target.value })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <input
                 placeholder="Cell Number *"
@@ -546,161 +546,165 @@ function AdultClasses() {
                 onChange={(e) =>
                   setFormStudent({ ...formStudent, cell: e.target.value })
                 }
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
             </div>
 
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
               * ID numbers and adult learner names must be unique across all classes
             </p>
 
             <button
               onClick={handleSubmitStudent}
               disabled={loading}
-              className="bg-emerald-700 text-white px-4 py-2 rounded disabled:opacity-50"
+              className="bg-emerald-700 text-white px-4 py-2 rounded disabled:opacity-50 text-sm md:text-base w-full sm:w-auto"
             >
               {loading ? "Processing..." : editingId ? "Update" : "Add"}
             </button>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-lg">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
+              <h2 className="font-semibold text-base md:text-lg">
                 {currentTeacher.name}'s Adult Learners
               </h2>
-              <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+              <div className="bg-purple-100 text-purple-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                 Total: {myStudents.length} learner{myStudents.length !== 1 ? 's' : ''}
               </div>
             </div>
 
-            <table className="w-full text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-2">ID</th>
-                  <th className="p-2">Name</th>
-                  <th className="p-2">Gender</th>
-                  <th className="p-2">Joined</th>
-                  <th className="p-2">Location</th>
-                  <th className="p-2">Cell</th>
-                  <th className="p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {myStudents.map((s) => (
-                  <tr key={s.id} className="border-b">
-                    <td className="p-2">{s.studentId}</td>
-                    <td className="p-2">{s.name}</td>
-                    <td className="p-2">{s.gender}</td>
-                    <td className="p-2">{s.dateJoined}</td>
-                    <td className="p-2">{s.location}</td>
-                    <td className="p-2">{s.cell}</td>
-                    <td className="p-2 space-x-2">
-                      <button
-                        onClick={() => handleEditStudent(s)}
-                        className="text-blue-600 hover:text-blue-800"
-                        disabled={loading}
-                      >
-                        Update
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStudent(s.id)}
-                        className="text-red-600 hover:text-red-800"
-                        disabled={loading}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {myStudents.length === 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs md:text-sm min-w-[600px]">
+                <thead className="bg-gray-100">
                   <tr>
-                    <td colSpan="7" className="p-4 text-center text-gray-500">
-                      No adult learners yet
-                    </td>
+                    <th className="p-2">ID</th>
+                    <th className="p-2">Name</th>
+                    <th className="p-2">Gender</th>
+                    <th className="p-2">Joined</th>
+                    <th className="p-2">Location</th>
+                    <th className="p-2">Cell</th>
+                    <th className="p-2">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {myStudents.map((s) => (
+                    <tr key={s.id} className="border-b">
+                      <td className="p-2">{s.studentId}</td>
+                      <td className="p-2">{s.name}</td>
+                      <td className="p-2">{s.gender}</td>
+                      <td className="p-2">{s.dateJoined}</td>
+                      <td className="p-2">{s.location}</td>
+                      <td className="p-2">{s.cell}</td>
+                      <td className="p-2 space-x-1 md:space-x-2">
+                        <button
+                          onClick={() => handleEditStudent(s)}
+                          className="text-blue-600 hover:text-blue-800 text-xs md:text-sm"
+                          disabled={loading}
+                        >
+                          Update
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStudent(s.id)}
+                          className="text-red-600 hover:text-red-800 text-xs md:text-sm"
+                          disabled={loading}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {myStudents.length === 0 && (
+                    <tr>
+                      <td colSpan="7" className="p-4 text-center text-gray-500 text-sm">
+                        No adult learners yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
 
       {/* All Registered Adult Ustaadhs Table with Actions */}
-      <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold">All Registered Adult Ustaadhs</h2>
-          <div className="text-sm text-gray-500">
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm mt-6 md:mt-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
+          <h2 className="font-semibold text-base md:text-lg">All Registered Adult Ustaadhs</h2>
+          <div className="text-xs md:text-sm text-gray-500">
             Total: {teachers.length} Ustaadh{teachers.length !== 1 ? 's' : ''}
           </div>
         </div>
         {loading ? (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-            <p className="mt-2 text-gray-600">Loading adult ustaadhs...</p>
+            <p className="mt-2 text-gray-600 text-sm md:text-base">Loading adult ustaadhs...</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2">Name</th>
-                <th className="p-2">Class</th>
-                <th className="p-2">Adult Learners</th>
-                <th className="p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {teachers.map((t) => {
-                const studentCount = getStudentCountForTeacher(t.name);
-                return (
-                  <tr key={t.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2 font-medium">{t.name}</td>
-                    <td className="p-2">{t.classTeaching}</td>
-                    <td className="p-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        studentCount === 0 
-                          ? 'bg-gray-100 text-gray-600' 
-                          : 'bg-purple-100 text-purple-800'
-                      }`}>
-                        {studentCount} learner{studentCount !== 1 ? 's' : ''}
-                      </span>
-                    </td>
-                    <td className="p-2 space-x-2">
-                      <button
-                        onClick={() => handleEditTeacher(t)}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                        disabled={loading}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTeacher(t.id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
-                        disabled={loading}
-                      >
-                        Delete
-                      </button>
-                      <button
-                        onClick={() => selectExistingTeacher(t)}
-                        className="text-emerald-600 hover:text-emerald-800 text-sm"
-                        disabled={loading}
-                      >
-                        Access
-                      </button>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs md:text-sm min-w-[600px]">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2">Name</th>
+                  <th className="p-2">Class</th>
+                  <th className="p-2">Adult Learners</th>
+                  <th className="p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {teachers.map((t) => {
+                  const studentCount = getStudentCountForTeacher(t.name);
+                  return (
+                    <tr key={t.id} className="border-b hover:bg-gray-50">
+                      <td className="p-2 font-medium">{t.name}</td>
+                      <td className="p-2">{t.classTeaching}</td>
+                      <td className="p-2">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          studentCount === 0 
+                            ? 'bg-gray-100 text-gray-600' 
+                            : 'bg-purple-100 text-purple-800'
+                        }`}>
+                          {studentCount} learner{studentCount !== 1 ? 's' : ''}
+                        </span>
+                      </td>
+                      <td className="p-2 space-x-1 md:space-x-2">
+                        <button
+                          onClick={() => handleEditTeacher(t)}
+                          className="text-blue-600 hover:text-blue-800 text-xs md:text-sm"
+                          disabled={loading}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTeacher(t.id)}
+                          className="text-red-600 hover:text-red-800 text-xs md:text-sm"
+                          disabled={loading}
+                        >
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => selectExistingTeacher(t)}
+                          className="text-emerald-600 hover:text-emerald-800 text-xs md:text-sm"
+                          disabled={loading}
+                        >
+                          Access
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {teachers.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan="4" className="p-4 text-center text-gray-500 text-sm">
+                      No adult ustaadhs registered
                     </td>
                   </tr>
-                );
-              })}
-              {teachers.length === 0 && !loading && (
-                <tr>
-                  <td colSpan="4" className="p-4 text-center text-gray-500">
-                    No adult ustaadhs registered
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
-        <p className="text-sm text-gray-500 mt-4">
+        <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
           Note: Editing a Ustaadh will update their name/class for all associated learners.
         </p>
       </div>
