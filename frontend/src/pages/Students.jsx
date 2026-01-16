@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { teacherApi, studentApi, duplicateCheckApi } from "../services/api";
-// You can keep API_BASE_URL import if you want, but it's not used in transfer now
+import { teacherApi, studentApi, duplicateCheckApi, API_BASE_URL } from "../services/api";
 
 function Students() {
   const [teachers, setTeachers] = useState([]);
@@ -117,7 +116,7 @@ function Students() {
 
         // If classTeaching changed → update all students' classTeaching
         if (updatedTeacher.classTeaching !== oldTeacher.classTeaching) {
-          await fetch(`http://localhost:8080/api/students/update-class?ustadh=${encodeURIComponent(updatedTeacher.name)}&oldClassTeaching=${encodeURIComponent(oldTeacher.classTeaching)}&newClassTeaching=${encodeURIComponent(updatedTeacher.classTeaching)}`, {
+          await fetch(`${API_BASE_URL}/students/update-class?ustadh=${encodeURIComponent(updatedTeacher.name)}&oldClassTeaching=${encodeURIComponent(oldTeacher.classTeaching)}&newClassTeaching=${encodeURIComponent(updatedTeacher.classTeaching)}`, {
             method: 'PUT',
           });
         }
@@ -244,7 +243,8 @@ function Students() {
         setEditingId(null);
         alert("Student updated successfully!");
       } else {
-        const response = await fetch(`http://localhost:8080/api/students`, {
+        // FIXED: Using API_BASE_URL instead of localhost
+        const response = await fetch(`${API_BASE_URL}/students`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -335,8 +335,8 @@ function Students() {
     }
 
     try {
-      // FULL BACKEND URL - this fixes "No static resource" error locally
-      const response = await fetch(`/api/students/transfer/${studentToTransfer.id}`, {
+      // Using API_BASE_URL
+      const response = await fetch(`${API_BASE_URL}/students/transfer/${studentToTransfer.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

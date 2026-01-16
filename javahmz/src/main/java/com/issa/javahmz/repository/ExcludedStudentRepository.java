@@ -38,6 +38,10 @@ public interface ExcludedStudentRepository extends JpaRepository<ExcludedStudent
            "AND FUNCTION('MONTH', e.excludedDate) = :month")
     Long countByMonth(@Param("year") int year, @Param("month") int month);
     
+    // Count excluded students by exclusion type - ADDED THIS METHOD
+    @Query("SELECT COUNT(e) FROM ExcludedStudent e WHERE e.exclusionType = :exclusionType")
+    Long countByExclusionType(@Param("exclusionType") String exclusionType);
+    
     // Search excluded students by name or ID or reason
     @Query("SELECT e FROM ExcludedStudent e " +
            "WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
@@ -57,6 +61,6 @@ public interface ExcludedStudentRepository extends JpaRepository<ExcludedStudent
     @Query("DELETE FROM ExcludedStudent e WHERE e.excludedDate < :date")
     long deleteByExcludedDateBefore(@Param("date") LocalDate date);
 
-    // MISSING METHOD ADDED - this fixes all your compilation errors
+    // Check if student ID exists in excluded students
     boolean existsByStudentId(String studentId);
 }

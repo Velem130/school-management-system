@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ExcludedStudentService {
@@ -116,4 +118,42 @@ public class ExcludedStudentService {
         LocalDate now = LocalDate.now();
         return excludedStudentRepository.countByMonth(now.getYear(), now.getMonthValue());
     }
+    
+    // Get statistics for excluded students (ADDED THIS METHOD)
+    public Map<String, Object> getStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+        
+        try {
+            // Count all excluded students
+            Long totalExcluded = excludedStudentRepository.count();
+            stats.put("totalExcluded", totalExcluded != null ? totalExcluded : 0);
+            
+            // Count this month
+            Long thisMonthCount = countExcludedStudentsThisMonth();
+            stats.put("thisMonth", thisMonthCount != null ? thisMonthCount : 0);
+            
+            // Count by common types
+            stats.put("transferred", excludedStudentRepository.countByExclusionType("transfer"));
+            stats.put("droppedOut", excludedStudentRepository.countByExclusionType("dropped_out"));
+            stats.put("completed", excludedStudentRepository.countByExclusionType("completed"));
+            
+            // Default values for other stats
+            stats.put("exclusionRate", 0.0);
+            stats.put("status", "success");
+            
+        } catch (Exception e) {
+            // Safe fallback values if any calculation fails
+            stats.put("totalExcluded", 0);
+            stats.put("thisMonth", 0);
+            stats.put("transferred", 0);
+            stats.put("droppedOut", 0);
+            stats.put("completed", 0);
+            stats.put("exclusionRate", 0.0);
+            stats.put("status", "error");
+            stats.put("message", "Failed to calculate statistics: " + e.getMessage());
+        }
+        
+        return stats;
+    }
 }
+   
