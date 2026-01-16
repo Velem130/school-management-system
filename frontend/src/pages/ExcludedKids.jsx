@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { excludedStudentApi } from "../services/api";
+import { excludedStudentApi, API_BASE_URL } from "../services/api";
 import { FaSearch, FaFilter, FaRedo, FaUserCheck } from "react-icons/fa";
 
 function ExcludedKids() {
@@ -28,7 +28,7 @@ function ExcludedKids() {
       setLoading(true);
       try {
         // Load active teachers (adjust endpoint if different)
-        const teacherResponse = await fetch("http://localhost:8080/api/teachers");
+        const teacherResponse = await fetch(`${API_BASE_URL}/teachers`);
         const allTeachers = await teacherResponse.json();
         setTeachers(allTeachers);
 
@@ -124,7 +124,7 @@ function ExcludedKids() {
       };
 
       // Create active active student with restore flag
-      const createResponse = await fetch("http://localhost:8080/api/students?restore=true", {
+      const createResponse = await fetch(`${API_BASE_URL}/students?restore=true`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(studentData),
