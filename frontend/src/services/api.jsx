@@ -3,7 +3,11 @@
 // Use environment variable for base URL (best for deployment)
 // Local: create .env file with VITE_API_URL=http://localhost:8080/api
 // Deployment: set VITE_API_URL=https://your-backend.onrender.com/api in Vercel/Render dashboard
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+if (!API_BASE_URL) {
+  throw new Error("VITE_API_URL is not defined");
+}
 
 // Teacher API calls
 export const teacherApi = {
