@@ -38,7 +38,7 @@ function App() {
           <Route path="/ustaads" element={<Ustaads />} />
           <Route path="/adult-classes" element={<AdultClasses />} />
           <Route path="/menlist" element={<MenList />} />
-          <Route path="/excluded-kids" element={<ExcludedKids />} /> {/* ADD THIS */}
+          <Route path="/excluded-kids" element={<ExcludedKids />} /> 
         </Routes>
       </div>
     </div>
