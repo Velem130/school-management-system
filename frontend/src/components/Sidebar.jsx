@@ -5,13 +5,9 @@ import { FaBars, FaTimes } from "react-icons/fa";
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const baseClass = "block px-4 py-3 rounded-md transition hover:bg-emerald-800 flex items-center gap-3 text-white";
-  const activeClass = "bg-emerald-700 font-semibold shadow-inner";
-
   const toggleSidebar = () => setIsOpen(!isOpen);
   const closeSidebar = () => setIsOpen(false);
 
-  // Links array - same as before
   const links = [
     { path: "/", label: "Dashboard" },
     { path: "/students", label: "Student Roll" },
@@ -22,58 +18,58 @@ function Sidebar() {
 
   return (
     <>
-      {/* MOBILE: Hamburger button + title at top */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-emerald-900 text-white p-4 flex justify-between items-center z-50 shadow-lg">
-        <h1 className="font-bold text-lg">BBIC Management</h1>
+      {/* MOBILE: Fixed top bar with hamburger */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-emerald-900 text-white p-4 flex justify-between items-center z-50 shadow-md">
+        <h1 className="font-bold text-xl">BBIC Management</h1>
         <button 
           onClick={toggleSidebar}
-          className="p-2 text-2xl focus:outline-none bg-emerald-800 rounded-md active:scale-95 transition"
+          className="p-2 text-3xl focus:outline-none bg-emerald-800 rounded-full active:scale-95 transition"
         >
           {isOpen ? <FaTimes /> : <FaBars />}
         </button>
       </div>
 
-      {/* MOBILE OVERLAY when sidebar open */}
+      {/* MOBILE OVERLAY when menu open */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm" 
+          className="fixed inset-0 bg-black/70 z-40 lg:hidden backdrop-blur-sm" 
           onClick={closeSidebar}
         />
       )}
 
-      {/* SIDEBAR / TOP NAV */}
-      <div
-        className={`
-          bg-emerald-900 text-white
-          ${isOpen 
-            ? "fixed inset-y-0 left-0 w-64 z-50 transform translate-x-0 lg:translate-x-0" 
-            : "fixed inset-y-0 -left-64 w-64 z-50 transform -translate-x-full lg:translate-x-0"}
-          transition-transform duration-300 ease-in-out
-          lg:relative lg:top-0 lg:left-0 lg:h-auto lg:w-full lg:border-b lg:border-emerald-800
-          lg:flex lg:items-center lg:justify-center lg:py-4
-        `}
-      >
-        {/* Mobile sidebar header */}
-        <div className="p-6 pt-20 lg:hidden">
-          <h1 className="text-xl font-bold mb-8 border-b border-emerald-700 pb-4 text-emerald-50">
-            BBIC Management
-          </h1>
+      {/* SIDEBAR (mobile) / TOP NAV (desktop) */}
+      <div className={`
+        bg-emerald-900 text-white
+        ${isOpen 
+          ? "fixed top-0 left-0 right-0 bottom-0 z-50 overflow-y-auto translate-y-0 lg:translate-y-0" 
+          : "fixed top-0 left-0 right-0 -translate-y-full lg:translate-y-0"}
+        lg:static lg:top-auto lg:left-auto lg:right-auto lg:bottom-auto lg:z-auto lg:bg-transparent lg:shadow-none
+        transition-all duration-300 ease-in-out lg:transition-none
+      `}>
+        {/* Mobile close button & title */}
+        <div className="lg:hidden p-6 flex justify-between items-center border-b border-emerald-800">
+          <h1 className="text-2xl font-bold text-emerald-50">BBIC Management</h1>
+          <button onClick={closeSidebar} className="text-3xl text-white">
+            <FaTimes />
+          </button>
         </div>
 
-        {/* Links - vertical on mobile, horizontal on desktop */}
+        {/* Navigation Links */}
         <nav className={`
-          flex flex-col lg:flex-row lg:items-center lg:gap-6 lg:space-y-0 space-y-2
-          px-6 lg:px-0
+          flex flex-col lg:flex-row lg:items-center lg:justify-center lg:gap-8 lg:px-8 lg:py-5
+          p-6 lg:p-0 space-y-4 lg:space-y-0
         `}>
           {links.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
-              onClick={closeSidebar} // Close mobile sidebar after click
+              onClick={closeSidebar}
               className={({ isActive }) => `
-                ${baseClass} 
-                ${isActive ? activeClass : ""} 
-                lg:text-base lg:hover:bg-emerald-800 lg:rounded-lg lg:px-5 lg:py-2.5
+                px-5 py-3 rounded-lg text-lg font-medium transition
+                ${isActive 
+                  ? "bg-emerald-700 text-white" 
+                  : "hover:bg-emerald-800 hover:text-white"}
+                lg:px-6 lg:py-2.5 lg:rounded-md lg:text-base
               `}
             >
               {link.label}
@@ -82,7 +78,7 @@ function Sidebar() {
         </nav>
       </div>
 
-      {/* Spacer for mobile - pushes content down when top bar is fixed */}
+      {/* Spacer for mobile top bar */}
       <div className="h-16 lg:hidden" />
     </>
   );
