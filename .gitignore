@@ -3,9 +3,6 @@ javahmz/target/
 *.jar
 *.war
 *.class
-.mvn/
-mvnw
-mvnw.cmd
 .idea/
 *.iml
 
