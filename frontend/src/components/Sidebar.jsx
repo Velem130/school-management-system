@@ -4,92 +4,64 @@ import { FaBars, FaTimes } from "react-icons/fa";
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
-  const baseClass = "block p-2 rounded-md transition hover:bg-emerald-800";
-  const activeClass = "bg-emerald-700 font-semibold";
+  const baseClass = "block p-3 rounded-md transition hover:bg-emerald-800 flex items-center gap-3";
+  const activeClass = "bg-emerald-700 font-semibold shadow-inner";
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
     <>
-      {/* Mobile Menu Button - Only visible on small screens */}
-      <div className="md:hidden bg-emerald-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 className="font-bold">BBIC Management</h1>
-        <button onClick={toggleSidebar} className="text-2xl focus:outline-none">
+      {/* Mobile Top Header (Only shows on mobile/tablet) */}
+      <div className="lg:hidden bg-emerald-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 w-full shadow-md">
+        <h1 className="font-bold text-lg">BBIC Management</h1>
+        <button onClick={toggleSidebar} className="p-2 text-2xl focus:outline-none bg-emerald-800 rounded-md">
           {isOpen ? <FaTimes /> : <FaBars />}
         </button>
       </div>
 
-      {/* Sidebar Overlay for mobile */}
+      {/* Sidebar Overlay (Dim background when mobile menu is open) */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" 
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm" 
           onClick={toggleSidebar}
         ></div>
       )}
 
+      {/* Sidebar Container */}
       <div
         className={`
           bg-emerald-900 text-white
-          w-64 fixed h-full z-40 transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0 md:static md:h-screen md:p-6 p-4
+          fixed lg:sticky top-0 left-0 h-screen z-50
+          transition-transform duration-300 ease-in-out
+          w-64 flex-shrink-0
+          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          border-r border-emerald-800
         `}
       >
-        <h1 className="text-xl font-bold mb-6 md:mb-8 border-b border-emerald-700 pb-4 hidden md:block">
-          BBIC Management
-        </h1>
+        <div className="p-6">
+          <h1 className="text-xl font-bold mb-8 border-b border-emerald-700 pb-4 hidden lg:block text-emerald-50">
+            BBIC Management
+          </h1>
 
-        <nav className="space-y-2 md:space-y-4">
-          <NavLink
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Dashboard
-          </NavLink>
-
-          <NavLink
-            to="/students"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Student Roll
-          </NavLink>
-
-          <NavLink
-            to="/ustaads"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Ustaads
-          </NavLink>
-
-          <NavLink
-            to="/adult-classes"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Adult Classes
-          </NavLink>
-
-          <NavLink
-            to="/menlist"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Men's List
-          </NavLink>
-        </nav>
+          <nav className="space-y-2">
+            {[
+              { path: "/", label: "Dashboard" },
+              { path: "/students", label: "Student Roll" },
+              { path: "/ustaads", label: "Ustaads" },
+              { path: "/adult-classes", label: "Adult Classes" },
+              { path: "/menlist", label: "Men's List" }
+            ].map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
       </div>
     </>
   );
