@@ -4,93 +4,69 @@ import { FaBars, FaTimes } from "react-icons/fa";
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
-  const baseClass = "block p-2 rounded-md transition hover:bg-emerald-800";
+  const baseClass =
+    "block px-4 py-2 rounded-md transition hover:bg-emerald-800";
   const activeClass = "bg-emerald-700 font-semibold";
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
     <>
-      {/* Mobile Menu Button - Only visible on small screens */}
-      <div className="md:hidden bg-emerald-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 className="font-bold">BBIC Management</h1>
-        <button onClick={toggleSidebar} className="text-2xl focus:outline-none">
-          {isOpen ? <FaTimes /> : <FaBars />}
-        </button>
-      </div>
+      {/* Navbar */}
+      <header className="bg-emerald-900 text-white sticky top-0 z-50">
+        <div className="flex items-center justify-between px-4 py-4 md:px-6">
+          <h1 className="font-bold text-lg">BBIC Management</h1>
 
-      {/* Sidebar Overlay for mobile */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" 
-          onClick={toggleSidebar}
-        ></div>
-      )}
+          {/* Desktop Menu */}
+          <nav className="hidden md:flex space-x-2">
+            <NavLink to="/" className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Dashboard
+            </NavLink>
+            <NavLink to="/students" className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Student Roll
+            </NavLink>
+            <NavLink to="/ustaads" className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Ustaads
+            </NavLink>
+            <NavLink to="/adult-classes" className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Adult Classes
+            </NavLink>
+            <NavLink to="/menlist" className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Men's List
+            </NavLink>
+          </nav>
 
-      <div
-        className={`
-          bg-emerald-900 text-white
-          w-64 fixed h-full z-40 transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0 md:static md:h-screen md:p-6 p-4
-        `}
-      >
-        <h1 className="text-xl font-bold mb-6 md:mb-8 border-b border-emerald-700 pb-4 hidden md:block">
-          BBIC Management
-        </h1>
+          {/* Mobile Menu Button */}
+          <button onClick={toggleSidebar} className="md:hidden text-2xl">
+            {isOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
 
-        <nav className="space-y-2 md:space-y-4">
-          <NavLink
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Dashboard
-          </NavLink>
-
-          <NavLink
-            to="/students"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Student Roll
-          </NavLink>
-
-          <NavLink
-            to="/ustaads"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Ustaads
-          </NavLink>
-
-          <NavLink
-            to="/adult-classes"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Adult Classes
-          </NavLink>
-
-          <NavLink
-            to="/menlist"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${baseClass} ${isActive ? activeClass : ""}`
-            }
-          >
-            Men's List
-          </NavLink>
-        </nav>
-      </div>
+        {/* Mobile Dropdown Menu */}
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-300 ${
+            isOpen ? "max-h-96" : "max-h-0"
+          }`}
+        >
+          <nav className="flex flex-col space-y-1 px-4 pb-4">
+            <NavLink to="/" onClick={() => setIsOpen(false)} className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Dashboard
+            </NavLink>
+            <NavLink to="/students" onClick={() => setIsOpen(false)} className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Student Roll
+            </NavLink>
+            <NavLink to="/ustaads" onClick={() => setIsOpen(false)} className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Ustaads
+            </NavLink>
+            <NavLink to="/adult-classes" onClick={() => setIsOpen(false)} className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Adult Classes
+            </NavLink>
+            <NavLink to="/menlist" onClick={() => setIsOpen(false)} className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ""}`}>
+              Men's List
+            </NavLink>
+          </nav>
+        </div>
+      </header>
     </>
   );
 }
