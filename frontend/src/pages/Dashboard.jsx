@@ -77,15 +77,9 @@ function Dashboard() {
   };
 
   return (
-    /* Added flex and justify-center to the main container to ensure absolute centering */
     <div className="bg-gray-50 min-h-screen w-full flex justify-center">
-      {/* 1. removed lg:pl-64 or any offsets. 
-        2. w-full ensures it fits mobile. 
-        3. max-w-7xl + mx-auto keeps it centered on wide screens.
-      */}
       <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         
-        {/* Header - Centered text on small devices */}
         <header className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-8 gap-6 text-center sm:text-left">
           <div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">BBIC Management Dashboard</h1>
@@ -110,7 +104,6 @@ function Dashboard() {
           </div>
         </header>
 
-        {/* Statistics Cards - Grid handles the centering and sizing */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-10">
           {/* Students Card */}
           <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-emerald-500 hover:shadow-lg transition-all">
@@ -124,8 +117,8 @@ function Dashboard() {
               {loading ? "..." : stats.totalLearners.toLocaleString()}
             </div>
             <div className="text-sm text-gray-600 mb-4">Total Learners</div>
-            <a href="/students" className="text-emerald-600 hover:text-emerald-800 text-sm font-bold flex items-center gap-1">
-              View Students <span>→</span>
+            <a href="/dashboard/learners-summary" className="text-emerald-600 hover:text-emerald-800 text-sm font-bold flex items-center gap-1">
+              View Students Summary →
             </a>
           </div>
 
@@ -141,8 +134,8 @@ function Dashboard() {
               {loading ? "..." : stats.activeUstaads.toLocaleString()}
             </div>
             <div className="text-sm text-gray-600 mb-4">Active Ustaads</div>
-            <a href="/ustaads" className="text-blue-600 hover:text-blue-800 text-sm font-bold flex items-center gap-1">
-              View Ustaads <span>→</span>
+            <a href="/dashboard/ustaads-summary" className="text-blue-600 hover:text-blue-800 text-sm font-bold flex items-center gap-1">
+              View Ustaads Summary →
             </a>
           </div>
 
@@ -158,8 +151,8 @@ function Dashboard() {
               {loading ? "..." : stats.adultClasses.toLocaleString()}
             </div>
             <div className="text-sm text-gray-600 mb-4">Adult Learners</div>
-            <a href="/adult-classes" className="text-purple-600 hover:text-purple-800 text-sm font-bold flex items-center gap-1">
-              View Adults <span>→</span>
+            <a href="/dashboard/adult-summary" className="text-purple-600 hover:text-purple-800 text-sm font-bold flex items-center gap-1">
+              View Adults Summary →
             </a>
           </div>
 
@@ -175,8 +168,8 @@ function Dashboard() {
               {loading ? "..." : stats.menList.toLocaleString()}
             </div>
             <div className="text-sm text-gray-600 mb-4">B.B.I.C Men's List</div>
-            <a href="/menlist" className="text-indigo-600 hover:text-indigo-800 text-sm font-bold flex items-center gap-1">
-              View Men <span>→</span>
+            <a href="/dashboard/menlist-summary" className="text-indigo-600 hover:text-indigo-800 text-sm font-bold flex items-center gap-1">
+              View Men Summary →
             </a>
           </div>
 
@@ -193,7 +186,7 @@ function Dashboard() {
             </div>
             <div className="text-sm text-gray-600 mb-4">Excluded Kids</div>
             <a href="/excluded-kids" className="text-red-600 hover:text-red-800 text-sm font-bold flex items-center gap-1">
-              View Excluded <span>→</span>
+              View Excluded →
             </a>
           </div>
         </div>
@@ -249,11 +242,11 @@ function Dashboard() {
           <h3 className="text-xl font-bold text-gray-900 mb-8">Management Quick Links</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
-              { label: "Students", path: "/students", bg: "bg-emerald-50", text: "text-emerald-700" },
-              { label: "Ustaads", path: "/ustaads", bg: "bg-blue-50", text: "text-blue-700" },
-              { label: "Adults", path: "/adult-classes", bg: "bg-purple-50", text: "text-purple-700" },
-              { label: "Men's List", path: "/menlist", bg: "bg-indigo-50", text: "text-indigo-700" },
-              { label: "Excluded", path: "/excluded-kids", bg: "bg-red-50", text: "text-red-700" }
+              { label: "Students Summary", path: "/dashboard/learners-summary", bg: "bg-emerald-50", text: "text-emerald-700" },
+              { label: "Ustaads Summary", path: "/dashboard/ustaads-summary", bg: "bg-blue-50", text: "text-blue-700" },
+              { label: "Adults Summary", path: "/dashboard/adult-summary", bg: "bg-purple-50", text: "text-purple-700" },
+              { label: "Men's List Summary", path: "/dashboard/menlist-summary", bg: "bg-indigo-50", text: "text-indigo-700" },
+              { label: "Excluded Summary", path: "/excluded-kids", bg: "bg-red-50", text: "text-red-700" }
             ].map((link, idx) => (
               <a key={idx} href={link.path} className={`${link.bg} p-6 rounded-2xl text-center hover:scale-105 transition-transform`}>
                 <div className={`${link.text} font-bold`}>{link.label}</div>
