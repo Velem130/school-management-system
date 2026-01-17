@@ -113,7 +113,7 @@ function Ustaads() {
   };
 
   return (
-    <div>
+    <div className="pt-10 md:pt-0">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">
         Ustaads Management
       </h1>

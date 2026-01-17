@@ -465,7 +465,7 @@ function Students() {
   };
 
   return (
-    <div>
+    <div className="pt-10 md:pt-0">
       <h1 className="text-2xl font-bold mb-6">Students Management</h1>
 
       {/* Teacher Selection / Registration */}

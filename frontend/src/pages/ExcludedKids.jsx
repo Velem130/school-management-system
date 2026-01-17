@@ -160,7 +160,7 @@ function ExcludedKids() {
   };
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="pt-10 pb-10 px-4 md:px-8">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 md:mb-8 gap-4">
         <div>
           <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">Excluded Students</h1>

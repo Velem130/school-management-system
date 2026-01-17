@@ -336,7 +336,7 @@ function AdultClasses() {
   };
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="pt-10 pb-10 px-4 md:px-8">
       <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Adult Classes</h1>
 
       {/* Teacher registration/update form */}

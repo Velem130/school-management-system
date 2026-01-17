@@ -269,7 +269,7 @@ function MenList() {
   };
 
   return (
-    <div>
+    <div className="pt-10 pb-10 px-4 md:px-8">
       <h1 className="text-2xl font-bold mb-6">Men's List Management</h1>
 
       {/* Step 1: Teacher registration/access */}

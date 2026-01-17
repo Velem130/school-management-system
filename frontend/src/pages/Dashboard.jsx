@@ -65,15 +65,11 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    loadStatistics();
-    const interval = setInterval(() => {
-      loadStatistics();
-    }, 30000);
-    return () => clearInterval(interval);
+    loadStatistics();  // Loads data only once when page loads
   }, []);
 
   const refreshStats = () => {
-    loadStatistics();
+    loadStatistics();  // Manual refresh button still works
   };
 
   return (

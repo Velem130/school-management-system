@@ -30,7 +30,7 @@ function UstaadsSummary() {
   }, []);
 
   return (
-    <div>
+    <div className="pt-10 pb-10 px-4 md:px-8">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">
         Ustaads Summary
       </h1>
