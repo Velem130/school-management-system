@@ -17,12 +17,12 @@ import ExcludedKids from "./pages/ExcludedKids"; // ADD THIS
 
 function App() {
   return (
-    <div className="flex bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content */}
-      <div className="ml-64 flex-1 p-8">
+      <div className="">
         <Routes>
           {/* Dashboard */}
           <Route path="/" element={<Dashboard />} />
@@ -46,7 +46,6 @@ function App() {
 }
 
 export default App;
-
 
 
 

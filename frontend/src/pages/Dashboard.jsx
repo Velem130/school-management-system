@@ -1,30 +1,8 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa";
-import {
-  ustaadApi,
-  studentApi,
-  adultStudentApi,
-  menStudentApi,
-  excludedStudentApi,
-} from "../services/api";
-import {
-  FaUserGraduate,
-  FaChalkboardTeacher,
-  FaUsers,
-  FaUserFriends,
-  FaUserMinus,
-} from "react-icons/fa";
+import { ustaadApi, studentApi, adultStudentApi, menStudentApi, excludedStudentApi } from "../services/api";
+import { FaUserGraduate, FaChalkboardTeacher, FaUsers, FaUserFriends, FaUserMinus } from "react-icons/fa";
 
 function Dashboard() {
-  /* ================= NAVBAR STATE ================= */
-  const [isOpen, setIsOpen] = useState(false);
-  const baseClass =
-    "block px-4 py-2 rounded-md transition hover:bg-emerald-800";
-  const activeClass = "bg-emerald-700 font-semibold";
-  const toggleSidebar = () => setIsOpen(!isOpen);
-
-  /* ================= DASHBOARD STATE ================= */
   const [stats, setStats] = useState({
     totalLearners: 0,
     activeUstaads: 0,
@@ -37,14 +15,13 @@ function Dashboard() {
   const loadStatistics = async () => {
     setLoading(true);
     try {
-      const [ustaads, students, adultStudents, menStudents, excludedStats] =
-        await Promise.all([
-          ustaadApi.getAll(),
-          studentApi.getAllStudents(),
-          adultStudentApi.getAllStudents(),
-          menStudentApi.getAllStudents(),
-          excludedStudentApi.getStatistics(),
-        ]);
+      const [ustaads, students, adultStudents, menStudents, excludedStats] = await Promise.all([
+        ustaadApi.getAll(),
+        studentApi.getAllStudents(),
+        adultStudentApi.getAllStudents(),
+        menStudentApi.getAllStudents(),
+        excludedStudentApi.getStatistics(),
+      ]);
 
       setStats({
         totalLearners: students.length,
@@ -55,6 +32,33 @@ function Dashboard() {
       });
     } catch (error) {
       console.error("Failed to load dashboard statistics:", error);
+      try {
+        const ustaads = await ustaadApi.getAll();
+        setStats(prev => ({ ...prev, activeUstaads: ustaads.length }));
+      } catch (e) { console.log("Failed to load ustaads:", e); }
+      try {
+        const students = await studentApi.getAllStudents();
+        setStats(prev => ({ ...prev, totalLearners: students.length }));
+      } catch (e) { console.log("Failed to load students:", e); }
+      try {
+        const adultStudents = await adultStudentApi.getAllStudents();
+        setStats(prev => ({ ...prev, adultClasses: adultStudents.length }));
+      } catch (e) { console.log("Failed to load adult students:", e); }
+      try {
+        const menStudents = await menStudentApi.getAllStudents();
+        setStats(prev => ({ ...prev, menList: menStudents.length }));
+      } catch (e) { console.log("Failed to load men students:", e); }
+      try {
+        const excludedStats = await excludedStudentApi.getStatistics();
+        setStats(prev => ({ ...prev, excludedKids: excludedStats.totalExcluded || 0 }));
+      } catch (e) {
+        try {
+          const excluded = await excludedStudentApi.getAllExcludedStudents();
+          setStats(prev => ({ ...prev, excludedKids: excluded.length || 0 }));
+        } catch (fallbackError) {
+          setStats(prev => ({ ...prev, excludedKids: 0 }));
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -62,121 +66,203 @@ function Dashboard() {
 
   useEffect(() => {
     loadStatistics();
-    const interval = setInterval(loadStatistics, 30000);
+    const interval = setInterval(() => {
+      loadStatistics();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
+  const refreshStats = () => {
+    loadStatistics();
+  };
+
   return (
-    <>
-      {/* ================= NAVBAR ================= */}
-      <header className="bg-emerald-900 text-white sticky top-0 z-50">
-        <div className="flex items-center justify-between px-4 py-4 md:px-6">
-          <h1 className="font-bold text-lg">BBIC Management</h1>
-
-          <nav className="hidden md:flex space-x-2">
-            {[
-              ["Dashboard", "/"],
-              ["Student Roll", "/students"],
-              ["Ustaads", "/ustaads"],
-              ["Adult Classes", "/adult-classes"],
-              ["Men's List", "/menlist"],
-            ].map(([label, path]) => (
-              <NavLink
-                key={path}
-                to={path}
-                className={({ isActive }) =>
-                  `${baseClass} ${isActive ? activeClass : ""}`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <button onClick={toggleSidebar} className="md:hidden text-2xl">
-            {isOpen ? <FaTimes /> : <FaBars />}
-          </button>
-        </div>
-
-        <div
-          className={`md:hidden overflow-hidden transition-all ${
-            isOpen ? "max-h-96" : "max-h-0"
-          }`}
-        >
-          <nav className="flex flex-col space-y-1 px-4 pb-4">
-            {[
-              ["Dashboard", "/"],
-              ["Student Roll", "/students"],
-              ["Ustaads", "/ustaads"],
-              ["Adult Classes", "/adult-classes"],
-              ["Men's List", "/menlist"],
-            ].map(([label, path]) => (
-              <NavLink
-                key={path}
-                to={path}
-                onClick={() => setIsOpen(false)}
-                className={baseClass}
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-      </header>
-
-      {/* ================= DASHBOARD ================= */}
-      <div className="bg-gray-50 min-h-screen px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
-            BBIC Management Dashboard
-          </h1>
-          <h2 className="text-xl font-semibold text-gray-700 mt-1">
-            Principal's Overview
-          </h2>
+    /* Added flex and justify-center to the main container to ensure absolute centering */
+    <div className="bg-gray-50 min-h-screen w-full flex justify-center">
+      {/* 1. removed lg:pl-64 or any offsets. 
+        2. w-full ensures it fits mobile. 
+        3. max-w-7xl + mx-auto keeps it centered on wide screens.
+      */}
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+        
+        {/* Header - Centered text on small devices */}
+        <header className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-8 gap-6 text-center sm:text-left">
+          <div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">BBIC Management Dashboard</h1>
+            <p className="text-lg sm:text-xl font-semibold text-gray-700 mt-1">
+              Principal's Overview
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm">
+              Bela Bela, Limpopo | {new Date().getFullYear()} Session
+            </div>
+            <button
+              onClick={refreshStats}
+              disabled={loading}
+              className="w-full sm:w-auto text-sm bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg hover:bg-emerald-200 flex items-center justify-center gap-2"
+            >
+              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </header>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-          {[
-            ["Students", stats.totalLearners, FaUserGraduate, "emerald"],
-            ["Ustaads", stats.activeUstaads, FaChalkboardTeacher, "blue"],
-            ["Adults", stats.adultClasses, FaUsers, "purple"],
-            ["Men", stats.menList, FaUserFriends, "indigo"],
-            ["Excluded", stats.excludedKids, FaUserMinus, "red"],
-          ].map(([label, value, Icon, color]) => (
-            <div
-              key={label}
-              className={`bg-white rounded-2xl shadow-md p-6 border-l-4 border-${color}-500`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <Icon className={`w-8 h-8 text-${color}-600`} />
-                <span className="text-gray-600">{label}</span>
+        {/* Statistics Cards - Grid handles the centering and sizing */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-10">
+          {/* Students Card */}
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-emerald-500 hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-emerald-100 rounded-xl">
+                <FaUserGraduate className="w-7 h-7 text-emerald-600" />
               </div>
-              <div className="text-5xl font-extrabold text-gray-900">
-                {loading ? "..." : value.toLocaleString()}
-              </div>
+              <span className="text-sm font-medium text-gray-500">Students</span>
             </div>
-          ))}
+            <div className="text-4xl font-extrabold text-gray-900 mb-1">
+              {loading ? "..." : stats.totalLearners.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-600 mb-4">Total Learners</div>
+            <a href="/students" className="text-emerald-600 hover:text-emerald-800 text-sm font-bold flex items-center gap-1">
+              View Students <span>→</span>
+            </a>
+          </div>
+
+          {/* Teachers Card */}
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <FaChalkboardTeacher className="w-7 h-7 text-blue-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-500">Teachers</span>
+            </div>
+            <div className="text-4xl font-extrabold text-gray-900 mb-1">
+              {loading ? "..." : stats.activeUstaads.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-600 mb-4">Active Ustaads</div>
+            <a href="/ustaads" className="text-blue-600 hover:text-blue-800 text-sm font-bold flex items-center gap-1">
+              View Ustaads <span>→</span>
+            </a>
+          </div>
+
+          {/* Adults Card */}
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-purple-500 hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-100 rounded-xl">
+                <FaUsers className="w-7 h-7 text-purple-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-500">Adults</span>
+            </div>
+            <div className="text-4xl font-extrabold text-gray-900 mb-1">
+              {loading ? "..." : stats.adultClasses.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-600 mb-4">Adult Learners</div>
+            <a href="/adult-classes" className="text-purple-600 hover:text-purple-800 text-sm font-bold flex items-center gap-1">
+              View Adults <span>→</span>
+            </a>
+          </div>
+
+          {/* Men Card */}
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-indigo-500 hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-indigo-100 rounded-xl">
+                <FaUserFriends className="w-7 h-7 text-indigo-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-500">Men</span>
+            </div>
+            <div className="text-4xl font-extrabold text-gray-900 mb-1">
+              {loading ? "..." : stats.menList.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-600 mb-4">B.B.I.C Men's List</div>
+            <a href="/menlist" className="text-indigo-600 hover:text-indigo-800 text-sm font-bold flex items-center gap-1">
+              View Men <span>→</span>
+            </a>
+          </div>
+
+          {/* Excluded Card */}
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-red-500 hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-100 rounded-xl">
+                <FaUserMinus className="w-7 h-7 text-red-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-500">Excluded</span>
+            </div>
+            <div className="text-4xl font-extrabold text-gray-900 mb-1">
+              {loading ? "..." : stats.excludedKids.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-600 mb-4">Excluded Kids</div>
+            <a href="/excluded-kids" className="text-red-600 hover:text-red-800 text-sm font-bold flex items-center gap-1">
+              View Excluded <span>→</span>
+            </a>
+          </div>
         </div>
 
-        {/* Latest Activities */}
-        <div className="bg-white rounded-2xl shadow-md p-6">
-          <h3 className="text-xl font-bold mb-4">Latest Activities</h3>
-          <ul className="space-y-4">
-            <li className="p-4 bg-green-50 rounded-xl">
-              Jalsa completed – 209 certificates awarded
-            </li>
-            <li className="p-4 bg-blue-50 rounded-xl">
-              Khatme-Quraan completed by adult learners
-            </li>
-            <li className="p-4 bg-yellow-50 rounded-xl">
-              Correctional Service Visit conducted
-            </li>
-          </ul>
+        {/* Quick Statistics + Activities Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+          <div className="bg-white rounded-2xl shadow-md p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Statistics</h3>
+            {loading ? (
+              <div className="text-center py-10">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {[
+                  { label: "Total Classes", value: stats.activeUstaads > 0 ? Math.ceil(stats.activeUstaads / 2) : 0 },
+                  { label: "Avg Students / Class", value: stats.activeUstaads > 0 ? Math.round(stats.totalLearners / stats.activeUstaads) : 0 },
+                  { label: "Exclusion Rate", value: `${stats.totalLearners > 0 ? ((stats.excludedKids / (stats.totalLearners + stats.excludedKids)) * 100).toFixed(1) : 0}%`, color: "text-red-600" },
+                  { label: "Active Members", value: stats.totalLearners + stats.adultClasses + stats.menList }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center pb-3 border-b border-gray-100 last:border-0">
+                    <span className="text-gray-600">{item.label}</span>
+                    <span className={`font-bold ${item.color || "text-gray-900"}`}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-md p-6 lg:col-span-2">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Latest Activities</h3>
+            <ul className="space-y-4">
+              <li className="flex gap-4 p-4 bg-green-50 rounded-xl">
+                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                <div>
+                  <div className="font-bold text-gray-900">Jalsa Completed</div>
+                  <div className="text-sm text-gray-600">Ext 6 Hall – 209 Certificates awarded.</div>
+                </div>
+              </li>
+              <li className="flex gap-4 p-4 bg-blue-50 rounded-xl">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div>
+                  <div className="font-bold text-gray-900">Khatme-Quraan</div>
+                  <div className="text-sm text-gray-600">25th Khatme-Quraan completed.</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Links Grid */}
+        <div className="bg-white rounded-2xl shadow-md p-8">
+          <h3 className="text-xl font-bold text-gray-900 mb-8">Management Quick Links</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[
+              { label: "Students", path: "/students", bg: "bg-emerald-50", text: "text-emerald-700" },
+              { label: "Ustaads", path: "/ustaads", bg: "bg-blue-50", text: "text-blue-700" },
+              { label: "Adults", path: "/adult-classes", bg: "bg-purple-50", text: "text-purple-700" },
+              { label: "Men's List", path: "/menlist", bg: "bg-indigo-50", text: "text-indigo-700" },
+              { label: "Excluded", path: "/excluded-kids", bg: "bg-red-50", text: "text-red-700" }
+            ].map((link, idx) => (
+              <a key={idx} href={link.path} className={`${link.bg} p-6 rounded-2xl text-center hover:scale-105 transition-transform`}>
+                <div className={`${link.text} font-bold`}>{link.label}</div>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
