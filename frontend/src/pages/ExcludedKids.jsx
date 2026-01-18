@@ -7,7 +7,9 @@ function ExcludedKids() {
   const [excludedLastYear, setExcludedLastYear] = useState([]);
   const [excludedTwoYearsAgo, setExcludedTwoYearsAgo] = useState([]);
 
-  const [teachers, setTeachers] = useState([]); // For restore modal
+  const [teachers, setTeachers] = useState([]);           // Now used ONLY for restore modal
+  const [ustaadhFilterOptions, setUstaadhFilterOptions] = useState([]); // NEW: unique teachers from exclusions
+
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [studentToRestore, setStudentToRestore] = useState(null);
   const [restoreData, setRestoreData] = useState({
@@ -22,19 +24,28 @@ function ExcludedKids() {
 
   const currentYear = new Date().getFullYear();
 
-  // Load teachers and excluded students
+  // Load data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Load active teachers (adjust endpoint if different)
+        // 1. Load active teachers (only for RESTORE modal)
         const teacherResponse = await fetch(`${API_BASE_URL}/teachers`);
         const allTeachers = await teacherResponse.json();
         setTeachers(allTeachers);
 
-        // Load all excluded
+        // 2. Load all excluded students
         const allExcluded = await excludedStudentApi.getAllExcludedStudents();
 
+        // NEW: Extract unique ustaadh names from excluded records for filter
+        const uniqueUstaadhs = [...new Set(
+          allExcluded
+            .map(s => s.ustadh)
+            .filter(name => name && name.trim() !== "") // skip empty/null
+        )];
+        setUstaadhFilterOptions(uniqueUstaadhs.sort()); // sort alphabetically
+
+        // Split by year
         const thisYear = allExcluded.filter(s => {
           const date = new Date(s.excludedDate);
           return date.getFullYear() === currentYear;
@@ -64,7 +75,7 @@ function ExcludedKids() {
     loadData();
   }, []);
 
-  // When teacher is selected, auto-set classTeaching from teacher's record
+  // Auto-set classTeaching when restoring
   useEffect(() => {
     if (restoreData.ustadh) {
       const selectedTeacher = teachers.find(t => t.name === restoreData.ustadh);
@@ -120,10 +131,9 @@ function ExcludedKids() {
         shoeSize: studentToRestore.shoeSize,
         cell: studentToRestore.cell,
         ustadh: restoreData.ustadh,
-        classTeaching: restoreData.classTeaching, // Changed to classTeaching (match entity)
+        classTeaching: restoreData.classTeaching,
       };
 
-      // Create active active student with restore flag
       const createResponse = await fetch(`${API_BASE_URL}/students?restore=true`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -135,10 +145,9 @@ function ExcludedKids() {
         throw new Error(errorData.message || "Failed to restore student");
       }
 
-      // Delete from excluded
       await excludedStudentApi.deleteExcludedStudent(studentToRestore.id);
 
-      // Refresh lists
+      // Refresh everything
       const allExcluded = await excludedStudentApi.getAllExcludedStudents();
       const thisYear = allExcluded.filter(s => new Date(s.excludedDate).getFullYear() === currentYear);
       const lastYear = allExcluded.filter(s => new Date(s.excludedDate).getFullYear() === currentYear - 1);
@@ -147,6 +156,14 @@ function ExcludedKids() {
       setExcludedThisYear(thisYear);
       setExcludedLastYear(lastYear);
       setExcludedTwoYearsAgo(twoYearsAgo);
+
+      // Refresh unique ustaadh options too
+      const uniqueUstaadhs = [...new Set(
+        allExcluded
+          .map(s => s.ustadh)
+          .filter(name => name && name.trim() !== "")
+      )];
+      setUstaadhFilterOptions(uniqueUstaadhs.sort());
 
       setShowRestoreModal(false);
       setStudentToRestore(null);
@@ -183,20 +200,30 @@ function ExcludedKids() {
               className="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2 border rounded-lg text-sm md:text-base"
             />
           </div>
+
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
             className="border rounded-lg px-3 md:px-4 py-2 text-sm md:text-base"
           >
             <option value="all">All Classes</option>
+            {/* You can populate unique classes later if needed */}
           </select>
+
+          {/* Ustaadh filter - now uses unique names from excluded students */}
           <select
             value={filterUstadh}
             onChange={(e) => setFilterUstadh(e.target.value)}
             className="border rounded-lg px-3 md:px-4 py-2 text-sm md:text-base"
           >
             <option value="all">All Ustaadhs</option>
+            {ustaadhFilterOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
           </select>
+
           <button
             onClick={() => {
               setSearchTerm("");
@@ -234,7 +261,7 @@ function ExcludedKids() {
         </div>
       </div>
 
-      {/* Restore Modal */}
+      {/* Restore Modal - unchanged */}
       {showRestoreModal && studentToRestore && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl max-w-full md:max-w-lg w-full overflow-hidden mx-2 md:mx-auto">
@@ -268,7 +295,7 @@ function ExcludedKids() {
                     <option value="">Select Teacher</option>
                     {teachers.map((t) => (
                       <option key={t.id} value={t.name}>
-                        {t.name} - {t.classTeaching}
+                        {t.name}
                       </option>
                     ))}
                   </select>
@@ -312,7 +339,7 @@ function ExcludedKids() {
   );
 }
 
-// Reusable Table Component
+// StudentTable component remains unchanged
 function StudentTable({ students, onRestore }) {
   if (students.length === 0) {
     return (

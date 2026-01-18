@@ -176,6 +176,16 @@ function Ustaads() {
         </button>
       </div>
 
+      {/* Total Ustaads Count - NEW ADDITION */}
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h3 className="text-lg font-semibold text-gray-800">
+          Total Registered Ustaads: 
+          <span className="ml-2 text-emerald-700 text-2xl font-bold">
+            {ustaads.length}
+          </span>
+        </h3>
+      </div>
+
       {/* Table */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h3 className="font-semibold mb-4">All Registered Ustaads</h3>

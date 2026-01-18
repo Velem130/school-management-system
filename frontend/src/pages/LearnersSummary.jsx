@@ -72,9 +72,9 @@ function LearnersSummary() {
         </div>
       </div>
 
-      {/* Students Table */}
+      {/* Students Table - NOW SHOWS ALL FIELDS */}
       <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">All Students</h2>
+        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">All Students (Full Details)</h2>
         
         {loading ? (
           <div className="text-center py-6 md:py-8">
@@ -83,7 +83,7 @@ function LearnersSummary() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-xs md:text-sm min-w-[600px] border-collapse">
+            <table className="w-full text-xs md:text-sm min-w-[900px] border-collapse">
               <thead className="bg-gray-100 text-gray-600">
                 <tr>
                   <th className="p-2 md:p-3 text-left">ID</th>
@@ -91,25 +91,31 @@ function LearnersSummary() {
                   <th className="p-2 md:p-3 text-left">Gender</th>
                   <th className="p-2 md:p-3 text-left">Class</th>
                   <th className="p-2 md:p-3 text-left">Teacher</th>
-                  <th className="p-2 md:p-3 text-left">Location</th>
+                  <th className="p-2 md:p-3 text-left">Date Joined</th>
+                  <th className="p-2 md:p-3 text-left">Home Location</th>
+                  <th className="p-2 md:p-3 text-left">Madrassa</th>
+                  <th className="p-2 md:p-3 text-left">Shoe Size</th>
                   <th className="p-2 md:p-3 text-left">Cell</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredStudents.map((s) => (
-                  <tr key={s.id} className="border-b">
-                    <td className="p-2 md:p-3">{s.studentId}</td>
-                    <td className="p-2 md:p-3">{s.name}</td>
-                    <td className="p-2 md:p-3">{s.gender}</td>
-                    <td className="p-2 md:p-3">{s.classTeaching}</td>
-                    <td className="p-2 md:p-3">{s.ustadh}</td>
-                    <td className="p-2 md:p-3">{s.location}</td>
-                    <td className="p-2 md:p-3">{s.cell}</td>
+                  <tr key={s.id} className="border-b hover:bg-gray-50">
+                    <td className="p-2 md:p-3">{s.studentId || "-"}</td>
+                    <td className="p-2 md:p-3">{s.name || "-"}</td>
+                    <td className="p-2 md:p-3">{s.gender || "-"}</td>
+                    <td className="p-2 md:p-3">{s.classTeaching || "-"}</td>
+                    <td className="p-2 md:p-3">{s.ustadh || "-"}</td>
+                    <td className="p-2 md:p-3">{s.dateJoined || "-"}</td>
+                    <td className="p-2 md:p-3">{s.location || "-"}</td>
+                    <td className="p-2 md:p-3">{s.madrassaLocation || "-"}</td>
+                    <td className="p-2 md:p-3">{s.shoeSize || "-"}</td>
+                    <td className="p-2 md:p-3">{s.cell || "-"}</td>
                   </tr>
                 ))}
                 {filteredStudents.length === 0 && !loading && (
                   <tr>
-                    <td colSpan="7" className="p-4 text-center text-gray-500 text-sm">
+                    <td colSpan="10" className="p-4 text-center text-gray-500 text-sm">
                       {search ? "No students found matching your search" : "No students found"}
                     </td>
                   </tr>
