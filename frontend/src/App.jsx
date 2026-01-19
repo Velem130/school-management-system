@@ -13,16 +13,18 @@ import Students from "./pages/Students";
 import Ustaads from "./pages/Ustaads";
 import AdultClasses from "./pages/AdultClasses";
 import MenList from "./pages/MenList";
-import ExcludedKids from "./pages/ExcludedKids"; // ADD THIS
+import ExcludedKids from "./pages/ExcludedKids"; 
 
 function App() {
   return (
-    <div className="bg-gray-50 min-h-screen">
-      {/* Sidebar */}
+    /* This main wrapper now handles the side-by-side layout */
+    <div className="bg-gray-50 min-h-screen flex flex-col lg:flex-row">
+      
+      {/* 1. The Sidebar (Stays on top for mobile, moves to left for laptop) */}
       <Sidebar />
 
-      {/* Main content */}
-      <div className="">
+      {/* 2. Main content (Takes up the remaining space on the right) */}
+      <div className="flex-1 w-full overflow-x-hidden">
         <Routes>
           {/* Dashboard */}
           <Route path="/" element={<Dashboard />} />
