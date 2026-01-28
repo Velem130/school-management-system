@@ -10,7 +10,7 @@ public class HelloController {
     // This annotation maps HTTP GET requests to the root path ("/")
     @GetMapping("/")
     public String home() {
-        return "Hello from Spring Boot pliz dont kill issa velem is my only hope . issa... .";
+        return "Hello from Spring Boot pliz dont kill issa velem is my only hope . issa.come.. .";
     }
 
     // You can add another path to test
