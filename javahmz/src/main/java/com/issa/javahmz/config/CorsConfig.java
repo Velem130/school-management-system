@@ -9,13 +9,15 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
+        registry.addMapping("/**") // apply to all endpoints
                 .allowedOrigins(
-                    "https://school-management-system-pi14s79la-velem130s-projects.vercel.app"
+                    "http://localhost:5173", // local frontend
+                    "https://school-management-system-pi14s79la-velem130s-projects.vercel.app" // prod frontend
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(false) // ✅ MUST be false
+                .allowCredentials(true)
                 .maxAge(3600);
     }
 }
+

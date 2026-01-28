@@ -15,6 +15,7 @@ function Students() {
     dateJoined: "",
     location: "",
     madrassaLocation: "",
+    
     shoeSize: "",
     cell: "",
   });
