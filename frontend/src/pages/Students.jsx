@@ -649,55 +649,113 @@ function Students() {
                 <p className="mt-2 text-gray-600">Loading students...</p>
               </div>
             ) : (
-              <div className="overflow-x-auto -mx-5 sm:-mx-6">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-100 text-gray-600">
-                    <tr>
-                      <th className="px-3 py-3 text-left text-xs font-medium">ID</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Name</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Gender</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Date Joined</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Home Loc</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Madrassa</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Shoe Size</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Cell</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {myStudents.map((s) => (
-                      <tr key={s.id} className="hover:bg-gray-50">
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.studentId}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.name}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.gender}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.dateJoined}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.location}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.madrassaLocation}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.shoeSize || "-"}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm">{s.cell}</td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm space-x-2">
-                          <button onClick={() => handleEditStudent(s)} className="text-blue-600 hover:text-blue-800" disabled={loading}>
-                            Update
-                          </button>
-                          <button onClick={() => handleTransferClick(s)} className="text-green-600 hover:text-green-800" disabled={loading}>
-                            Transfer
-                          </button>
-                          <button onClick={() => handleDeleteClick(s)} className="text-red-600 hover:text-red-800" disabled={loading}>
-                            Exclude
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {myStudents.length === 0 && !loading && (
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-100 text-gray-600">
                       <tr>
-                        <td colSpan="9" className="px-3 py-4 text-center text-gray-500 text-sm">
-                          No students added yet
-                        </td>
+                        <th className="px-3 py-3 text-left text-xs font-medium">ID</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Name</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Gender</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Date Joined</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Home Loc</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Madrassa</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Shoe Size</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Cell</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium">Actions</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {myStudents.map((s) => (
+                        <tr key={s.id} className="hover:bg-gray-50">
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.studentId}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.name}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.gender}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.dateJoined}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.location}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.madrassaLocation}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.shoeSize || "-"}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm">{s.cell}</td>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm space-x-2">
+                            <button onClick={() => handleEditStudent(s)} className="text-blue-600 hover:text-blue-800" disabled={loading}>
+                              Update
+                            </button>
+                            <button onClick={() => handleTransferClick(s)} className="text-green-600 hover:text-green-800" disabled={loading}>
+                              Transfer
+                            </button>
+                            <button onClick={() => handleDeleteClick(s)} className="text-red-600 hover:text-red-800" disabled={loading}>
+                              Exclude
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {myStudents.length === 0 && !loading && (
+                        <tr>
+                          <td colSpan="9" className="px-3 py-4 text-center text-gray-500 text-sm">
+                            No students added yet
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {myStudents.map((s) => (
+                    <div key={s.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="space-y-2 mb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold text-gray-800">{s.name}</p>
+                            <p className="text-sm text-gray-600">ID: {s.studentId}</p>
+                          </div>
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                            {s.gender}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p><span className="font-medium">Joined:</span> {s.dateJoined}</p>
+                          <p><span className="font-medium">Home:</span> {s.location}</p>
+                          <p><span className="font-medium">Madrassa:</span> {s.madrassaLocation}</p>
+                          <p><span className="font-medium">Shoe Size:</span> {s.shoeSize || "-"}</p>
+                          <p><span className="font-medium">Cell:</span> {s.cell}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 pt-3 border-t">
+                        <button
+                          onClick={() => handleEditStudent(s)}
+                          className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-xs font-medium"
+                          disabled={loading}
+                        >
+                          Update
+                        </button>
+                        <button
+                          onClick={() => handleTransferClick(s)}
+                          className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 disabled:opacity-50 text-xs font-medium"
+                          disabled={loading}
+                        >
+                          Transfer
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(s)}
+                          className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-xs font-medium"
+                          disabled={loading}
+                        >
+                          Exclude
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {myStudents.length === 0 && !loading && (
+                    <div className="p-8 text-center text-gray-500">
+                      No students added yet
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -706,7 +764,9 @@ function Students() {
       {/* All Registered Teachers Table - Responsive */}
       <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm">
         <h2 className="font-semibold mb-4 text-lg sm:text-xl">All Registered Teachers</h2>
-        <div className="overflow-x-auto -mx-5 sm:-mx-6">
+        
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100 text-gray-600">
               <tr>
@@ -745,6 +805,45 @@ function Students() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {teachers.map((t) => (
+            <div key={t.id} className="border rounded-lg p-4 bg-gray-50">
+              <div className="space-y-2 mb-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-gray-800">{t.name}</p>
+                    <p className="text-sm text-gray-600">Class: {t.classTeaching}</p>
+                  </div>
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                    {teacherCountsLoading ? "..." : (t.studentCount ?? 0)} students
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-3 border-t">
+                <button
+                  onClick={() => handleEditTeacher(t)}
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={() => handleDeleteTeacher(t.id)}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm font-medium"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {teachers.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              No teachers registered yet
+            </div>
+          )}
         </div>
       </div>
 

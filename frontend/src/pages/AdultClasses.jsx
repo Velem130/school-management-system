@@ -573,7 +573,8 @@ function AdultClasses() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-xs md:text-sm min-w-[600px]">
                 <thead className="bg-gray-100">
                   <tr>
@@ -623,6 +624,52 @@ function AdultClasses() {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {myStudents.map((s) => (
+                <div key={s.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="space-y-2 mb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-gray-800">{s.name}</p>
+                        <p className="text-sm text-gray-600">ID: {s.studentId}</p>
+                      </div>
+                      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
+                        {s.gender}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><span className="font-medium">Joined:</span> {s.dateJoined}</p>
+                      <p><span className="font-medium">Location:</span> {s.location}</p>
+                      <p><span className="font-medium">Cell:</span> {s.cell}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-3 border-t">
+                    <button
+                      onClick={() => handleEditStudent(s)}
+                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+                      disabled={loading}
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStudent(s.id)}
+                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-sm font-medium"
+                      disabled={loading}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {myStudents.length === 0 && (
+                <div className="p-8 text-center text-gray-500">
+                  No adult learners yet
+                </div>
+              )}
+            </div>
           </div>
         </>
       )}
@@ -641,68 +688,126 @@ function AdultClasses() {
             <p className="mt-2 text-gray-600 text-sm md:text-base">Loading adult ustaadhs...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs md:text-sm min-w-[600px]">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-2">Name</th>
-                  <th className="p-2">Class</th>
-                  <th className="p-2">Adult Learners</th>
-                  <th className="p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teachers.map((t) => {
-                  const studentCount = getStudentCountForTeacher(t.name);
-                  return (
-                    <tr key={t.id} className="border-b hover:bg-gray-50">
-                      <td className="p-2 font-medium">{t.name}</td>
-                      <td className="p-2">{t.classTeaching}</td>
-                      <td className="p-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-xs md:text-sm min-w-[600px]">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2">Name</th>
+                    <th className="p-2">Class</th>
+                    <th className="p-2">Adult Learners</th>
+                    <th className="p-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teachers.map((t) => {
+                    const studentCount = getStudentCountForTeacher(t.name);
+                    return (
+                      <tr key={t.id} className="border-b hover:bg-gray-50">
+                        <td className="p-2 font-medium">{t.name}</td>
+                        <td className="p-2">{t.classTeaching}</td>
+                        <td className="p-2">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            studentCount === 0 
+                              ? 'bg-gray-100 text-gray-600' 
+                              : 'bg-purple-100 text-purple-800'
+                          }`}>
+                            {studentCount} learner{studentCount !== 1 ? 's' : ''}
+                          </span>
+                        </td>
+                        <td className="p-2 space-x-1 md:space-x-2">
+                          <button
+                            onClick={() => handleEditTeacher(t)}
+                            className="text-blue-600 hover:text-blue-800 text-xs md:text-sm"
+                            disabled={loading}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTeacher(t.id)}
+                            className="text-red-600 hover:text-red-800 text-xs md:text-sm"
+                            disabled={loading}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => selectExistingTeacher(t)}
+                            className="text-emerald-600 hover:text-emerald-800 text-xs md:text-sm"
+                            disabled={loading}
+                          >
+                            Access
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {teachers.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan="4" className="p-4 text-center text-gray-500 text-sm">
+                        No adult ustaadhs registered
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {teachers.map((t) => {
+                const studentCount = getStudentCountForTeacher(t.name);
+                return (
+                  <div key={t.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="space-y-2 mb-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-gray-800">{t.name}</p>
+                          <p className="text-sm text-gray-600">Class: {t.classTeaching}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs ${
                           studentCount === 0 
                             ? 'bg-gray-100 text-gray-600' 
                             : 'bg-purple-100 text-purple-800'
                         }`}>
                           {studentCount} learner{studentCount !== 1 ? 's' : ''}
                         </span>
-                      </td>
-                      <td className="p-2 space-x-1 md:space-x-2">
-                        <button
-                          onClick={() => handleEditTeacher(t)}
-                          className="text-blue-600 hover:text-blue-800 text-xs md:text-sm"
-                          disabled={loading}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTeacher(t.id)}
-                          className="text-red-600 hover:text-red-800 text-xs md:text-sm"
-                          disabled={loading}
-                        >
-                          Delete
-                        </button>
-                        <button
-                          onClick={() => selectExistingTeacher(t)}
-                          className="text-emerald-600 hover:text-emerald-800 text-xs md:text-sm"
-                          disabled={loading}
-                        >
-                          Access
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {teachers.length === 0 && !loading && (
-                  <tr>
-                    <td colSpan="4" className="p-4 text-center text-gray-500 text-sm">
-                      No adult ustaadhs registered
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 pt-3 border-t">
+                      <button
+                        onClick={() => handleEditTeacher(t)}
+                        className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-xs font-medium"
+                        disabled={loading}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTeacher(t.id)}
+                        className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-xs font-medium"
+                        disabled={loading}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => selectExistingTeacher(t)}
+                        className="bg-emerald-600 text-white px-3 py-2 rounded hover:bg-emerald-700 disabled:opacity-50 text-xs font-medium"
+                        disabled={loading}
+                      >
+                        Access
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {teachers.length === 0 && !loading && (
+                <div className="p-8 text-center text-gray-500">
+                  No adult ustaadhs registered
+                </div>
+              )}
+            </div>
+          </>
         )}
         <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
           Note: Editing a Ustaadh will update their name/class for all associated learners.
@@ -713,4 +818,3 @@ function AdultClasses() {
 }
 
 export default AdultClasses;
-

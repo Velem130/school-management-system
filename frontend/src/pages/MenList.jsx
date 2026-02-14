@@ -270,29 +270,29 @@ function MenList() {
 
   return (
     <div className="pt-10 pb-10 px-4 md:px-8">
-      <h1 className="text-2xl font-bold mb-6">Men's List Management</h1>
+      <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Men's List Management</h1>
 
       {/* Step 1: Teacher registration/access */}
       {!currentTeacher && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Left side: New Teacher Registration */}
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h2 className="font-semibold mb-4 text-lg">New Teacher Registration</h2>
-            <div className="grid grid-cols-1 gap-4 mb-4">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+            <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">New Teacher Registration</h2>
+            <div className="grid grid-cols-1 gap-3 md:gap-4 mb-3 md:mb-4">
               <input
                 placeholder="Teacher Name *"
                 value={formTeacher.name}
                 onChange={(e) => setFormTeacher({ ...formTeacher, name: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <input
                 placeholder="Class Teaching *"
                 value={formTeacher.classTeaching}
                 onChange={(e) => setFormTeacher({ ...formTeacher, classTeaching: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
             </div>
-            <div className="flex items-center mb-4">
+            <div className="flex items-center mb-3 md:mb-4">
               <input
                 type="checkbox"
                 id="newTeacher"
@@ -300,11 +300,11 @@ function MenList() {
                 onChange={(e) => setIsNewTeacher(e.target.checked)}
                 className="mr-2"
               />
-              <label htmlFor="newTeacher" className="text-sm text-gray-600">
+              <label htmlFor="newTeacher" className="text-xs md:text-sm text-gray-600">
                 I am a new teacher (register me)
               </label>
             </div>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
               {isNewTeacher 
                 ? "Teacher names must be unique. If you already exist, uncheck the box above."
                 : "Access your existing class by entering exact name and class."
@@ -313,21 +313,21 @@ function MenList() {
             <button
               onClick={handleAddTeacher}
               disabled={loading}
-              className="bg-emerald-700 text-white px-4 py-2 rounded hover:bg-emerald-800 w-full disabled:opacity-50"
+              className="bg-emerald-700 text-white px-4 py-2 rounded hover:bg-emerald-800 w-full disabled:opacity-50 text-sm md:text-base"
             >
               {loading ? "Processing..." : isNewTeacher ? "Register & Continue" : "Access My Class"}
             </button>
           </div>
 
           {/* Right side: Existing Teachers List */}
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h2 className="font-semibold mb-4 text-lg">Access Existing Teacher</h2>
-            <p className="text-sm text-gray-500 mb-4">Select your name to access your class:</p>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+            <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">Access Existing Teacher</h2>
+            <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">Select your name to access your class:</p>
+            <div className="space-y-2 md:space-y-3 max-h-60 md:max-h-80 overflow-y-auto">
               {loading ? (
                 <div className="text-center py-4">
                   <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-emerald-500"></div>
-                  <p className="mt-2 text-gray-600">Loading teachers...</p>
+                  <p className="mt-2 text-gray-600 text-sm">Loading teachers...</p>
                 </div>
               ) : (
                 <>
@@ -336,15 +336,15 @@ function MenList() {
                     return (
                       <div 
                         key={t.id} 
-                        className="border p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        className="border p-2 md:p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
                         onClick={() => selectExistingTeacher(t)}
                       >
                         <div className="flex justify-between items-center">
                           <div>
-                            <div className="font-medium">{t.name}</div>
-                            <div className="text-sm text-gray-600">Class: {t.classTeaching}</div>
+                            <div className="font-medium text-sm md:text-base">{t.name}</div>
+                            <div className="text-xs md:text-sm text-gray-600">Class: {t.classTeaching}</div>
                           </div>
-                          <div className="text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
+                          <div className="text-xs md:text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
                             {studentCount} member{studentCount !== 1 ? 's' : ''}
                           </div>
                         </div>
@@ -352,14 +352,14 @@ function MenList() {
                     );
                   })}
                   {teachers.length === 0 && !loading && (
-                    <div className="text-center text-gray-500 py-4">
+                    <div className="text-center text-gray-500 py-4 text-sm">
                       No teachers registered yet
                     </div>
                   )}
                 </>
               )}
             </div>
-            <p className="text-sm text-gray-500 mt-4">
+            <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
               Click on your name above to quickly access your class
             </p>
           </div>
@@ -368,19 +368,19 @@ function MenList() {
 
       {/* Step 2: Add Members */}
       {currentTeacher && (
-        <div className="mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-8">
-            <div className="flex justify-between items-center mb-4">
+        <div className="mb-6 md:mb-8">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm mb-6 md:mb-8">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
               <div>
-                <h2 className="font-semibold text-lg">
+                <h2 className="font-semibold text-base md:text-lg">
                   {editingId ? "Update Member" : "Add Member"} for {currentTeacher.name} - {currentTeacher.classTeaching}
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs md:text-sm text-gray-500">
                   {isNewTeacher ? "New teacher mode" : "Existing teacher mode"}
                 </p>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium">
+              <div className="flex items-center space-x-2 md:space-x-4">
+                <div className="bg-emerald-100 text-emerald-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                   Members: {getStudentCountForTeacher(currentTeacher.name)}
                 </div>
                 <button
@@ -388,25 +388,25 @@ function MenList() {
                     setCurrentTeacher(null);
                     setFormTeacher({ name: "", classTeaching: "" });
                   }}
-                  className="text-gray-600 hover:text-gray-800 text-sm"
+                  className="text-gray-600 hover:text-gray-800 text-xs md:text-sm"
                 >
                   Switch Teacher
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
               <input
                 placeholder="Name & Surname *"
                 name="name"
                 value={formStudent.name}
                 onChange={(e) => setFormStudent({ ...formStudent, name: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <select
                 name="gender"
                 value={formStudent.gender}
                 onChange={(e) => setFormStudent({ ...formStudent, gender: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               >
                 <option value="">Select Gender *</option>
                 <option value="Male">Male</option>
@@ -417,164 +417,274 @@ function MenList() {
                 name="dateJoined"
                 value={formStudent.dateJoined}
                 onChange={(e) => setFormStudent({ ...formStudent, dateJoined: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <input
                 placeholder="Location *"
                 name="location"
                 value={formStudent.location}
                 onChange={(e) => setFormStudent({ ...formStudent, location: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
               <input
                 placeholder="Cell Number *"
                 name="cell"
                 value={formStudent.cell}
                 onChange={(e) => setFormStudent({ ...formStudent, cell: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm md:text-base"
               />
             </div>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
               * Member names must be unique across all classes
             </p>
             <button
               onClick={handleSubmitStudent}
               disabled={loading}
-              className="bg-emerald-700 text-white px-4 py-2 rounded hover:bg-emerald-800 disabled:opacity-50"
+              className="bg-emerald-700 text-white px-4 py-2 rounded hover:bg-emerald-800 disabled:opacity-50 text-sm md:text-base w-full sm:w-auto"
             >
               {loading ? "Processing..." : editingId ? "Update" : "Add Member"}
             </button>
           </div>
 
           {/* Teacher-specific table */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-lg">{currentTeacher.name}'s Members</h2>
-              <div className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+          <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-6 md:mb-8">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
+              <h2 className="font-semibold text-base md:text-lg">{currentTeacher.name}'s Members</h2>
+              <div className="bg-indigo-100 text-indigo-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                 Total: {myStudents.length} member{myStudents.length !== 1 ? 's' : ''}
               </div>
             </div>
-            <table className="w-full text-sm border-collapse">
-              <thead className="bg-gray-100 text-gray-600">
-                <tr>
-                  <th className="p-3 text-left">ID</th>
-                  <th className="p-3 text-left">Name</th>
-                  <th className="p-3 text-left">Gender</th>
-                  <th className="p-3 text-left">Date Joined</th>
-                  <th className="p-3 text-left">Location</th>
-                  <th className="p-3 text-left">Cell</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {myStudents.map((s) => (
-                  <tr key={s.id} className="border-b">
-                    <td className="p-3">{s.studentId}</td>
-                    <td className="p-3">{s.name}</td>
-                    <td className="p-3">{s.gender}</td>
-                    <td className="p-3">{s.dateJoined}</td>
-                    <td className="p-3">{s.location}</td>
-                    <td className="p-3">{s.cell}</td>
-                    <td className="p-3 space-x-2">
-                      <button
-                        onClick={() => handleEditStudent(s)}
-                        className="text-blue-600 hover:text-blue-800"
-                        disabled={loading}
-                      >
-                        Update
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStudent(s.id)}
-                        className="text-red-600 hover:text-red-800"
-                        disabled={loading}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {myStudents.length === 0 && (
+            
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead className="bg-gray-100 text-gray-600">
                   <tr>
-                    <td colSpan="7" className="p-4 text-center text-gray-500">
-                      No members added yet
-                    </td>
+                    <th className="p-3 text-left">ID</th>
+                    <th className="p-3 text-left">Name</th>
+                    <th className="p-3 text-left">Gender</th>
+                    <th className="p-3 text-left">Date Joined</th>
+                    <th className="p-3 text-left">Location</th>
+                    <th className="p-3 text-left">Cell</th>
+                    <th className="p-3 text-left">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {myStudents.map((s) => (
+                    <tr key={s.id} className="border-b">
+                      <td className="p-3">{s.studentId}</td>
+                      <td className="p-3">{s.name}</td>
+                      <td className="p-3">{s.gender}</td>
+                      <td className="p-3">{s.dateJoined}</td>
+                      <td className="p-3">{s.location}</td>
+                      <td className="p-3">{s.cell}</td>
+                      <td className="p-3 space-x-2">
+                        <button
+                          onClick={() => handleEditStudent(s)}
+                          className="text-blue-600 hover:text-blue-800"
+                          disabled={loading}
+                        >
+                          Update
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStudent(s.id)}
+                          className="text-red-600 hover:text-red-800"
+                          disabled={loading}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {myStudents.length === 0 && (
+                    <tr>
+                      <td colSpan="7" className="p-4 text-center text-gray-500">
+                        No members added yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {myStudents.map((s) => (
+                <div key={s.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="space-y-2 mb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-gray-800">{s.name}</p>
+                        <p className="text-sm text-gray-600">ID: {s.studentId}</p>
+                      </div>
+                      <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs">
+                        {s.gender}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><span className="font-medium">Joined:</span> {s.dateJoined}</p>
+                      <p><span className="font-medium">Location:</span> {s.location}</p>
+                      <p><span className="font-medium">Cell:</span> {s.cell}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-3 border-t">
+                    <button
+                      onClick={() => handleEditStudent(s)}
+                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+                      disabled={loading}
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStudent(s.id)}
+                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-sm font-medium"
+                      disabled={loading}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {myStudents.length === 0 && (
+                <div className="p-8 text-center text-gray-500">
+                  No members added yet
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {/* Teacher Registry List with Member Counts */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h2 className="font-semibold mb-4">All Registered Teachers</h2>
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">All Registered Teachers</h2>
         {loading ? (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-            <p className="mt-2 text-gray-600">Loading teachers...</p>
+            <p className="mt-2 text-gray-600 text-sm md:text-base">Loading teachers...</p>
           </div>
         ) : (
-          <table className="w-full text-sm border-collapse">
-            <thead className="bg-gray-100 text-gray-600">
-              <tr>
-                <th className="p-3 text-left">Teacher Name</th>
-                <th className="p-3 text-left">Class</th>
-                <th className="p-3 text-left">Members</th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead className="bg-gray-100 text-gray-600">
+                  <tr>
+                    <th className="p-3 text-left">Teacher Name</th>
+                    <th className="p-3 text-left">Class</th>
+                    <th className="p-3 text-left">Members</th>
+                    <th className="p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teachers.map((t) => {
+                    const studentCount = getStudentCountForTeacher(t.name);
+                    return (
+                      <tr key={t.id} className="border-b">
+                        <td className="p-3">{t.name}</td>
+                        <td className="p-3">{t.classTeaching}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            studentCount === 0 
+                              ? 'bg-gray-100 text-gray-600' 
+                              : 'bg-indigo-100 text-indigo-800'
+                          }`}>
+                            {studentCount} member{studentCount !== 1 ? 's' : ''}
+                          </span>
+                        </td>
+                        <td className="p-3 space-x-2">
+                          <button
+                            onClick={() => handleEditTeacher(t)}
+                            className="text-blue-600 hover:text-blue-800"
+                            disabled={loading}
+                          >
+                            Update
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTeacher(t.id)}
+                            className="text-red-600 hover:text-red-800"
+                            disabled={loading}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => selectExistingTeacher(t)}
+                            className="text-emerald-600 hover:text-emerald-800"
+                            disabled={loading}
+                          >
+                            Access
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {teachers.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan="4" className="p-4 text-center text-gray-500">
+                        No teachers registered yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
               {teachers.map((t) => {
                 const studentCount = getStudentCountForTeacher(t.name);
                 return (
-                  <tr key={t.id} className="border-b">
-                    <td className="p-3">{t.name}</td>
-                    <td className="p-3">{t.classTeaching}</td>
-                    <td className="p-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        studentCount === 0 
-                          ? 'bg-gray-100 text-gray-600' 
-                          : 'bg-indigo-100 text-indigo-800'
-                      }`}>
-                        {studentCount} member{studentCount !== 1 ? 's' : ''}
-                      </span>
-                    </td>
-                    <td className="p-3 space-x-2">
+                  <div key={t.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="space-y-2 mb-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-gray-800">{t.name}</p>
+                          <p className="text-sm text-gray-600">Class: {t.classTeaching}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          studentCount === 0 
+                            ? 'bg-gray-100 text-gray-600' 
+                            : 'bg-indigo-100 text-indigo-800'
+                        }`}>
+                          {studentCount} member{studentCount !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 pt-3 border-t">
                       <button
                         onClick={() => handleEditTeacher(t)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-xs font-medium"
                         disabled={loading}
                       >
                         Update
                       </button>
                       <button
                         onClick={() => handleDeleteTeacher(t.id)}
-                        className="text-red-600 hover:text-red-800"
+                        className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-xs font-medium"
                         disabled={loading}
                       >
                         Delete
                       </button>
                       <button
                         onClick={() => selectExistingTeacher(t)}
-                        className="text-emerald-600 hover:text-emerald-800"
+                        className="bg-emerald-600 text-white px-3 py-2 rounded hover:bg-emerald-700 disabled:opacity-50 text-xs font-medium"
                         disabled={loading}
                       >
                         Access
                       </button>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 );
               })}
+
               {teachers.length === 0 && !loading && (
-                <tr>
-                  <td colSpan="4" className="p-4 text-center text-gray-500">
-                    No teachers registered yet
-                  </td>
-                </tr>
+                <div className="p-8 text-center text-gray-500">
+                  No teachers registered yet
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>
