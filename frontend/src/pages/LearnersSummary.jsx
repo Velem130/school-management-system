@@ -82,47 +82,127 @@ function LearnersSummary() {
             <p className="mt-2 text-gray-600 text-sm md:text-base">Loading students...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs md:text-sm min-w-[900px] border-collapse">
-              <thead className="bg-gray-100 text-gray-600">
-                <tr>
-                  <th className="p-2 md:p-3 text-left">ID</th>
-                  <th className="p-2 md:p-3 text-left">Name</th>
-                  <th className="p-2 md:p-3 text-left">Gender</th>
-                  <th className="p-2 md:p-3 text-left">Class</th>
-                  <th className="p-2 md:p-3 text-left">Teacher</th>
-                  <th className="p-2 md:p-3 text-left">Date Joined</th>
-                  <th className="p-2 md:p-3 text-left">Home Location</th>
-                  <th className="p-2 md:p-3 text-left">Madrassa</th>
-                  <th className="p-2 md:p-3 text-left">Shoe Size</th>
-                  <th className="p-2 md:p-3 text-left">Cell</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudents.map((s) => (
-                  <tr key={s.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2 md:p-3">{s.studentId || "-"}</td>
-                    <td className="p-2 md:p-3">{s.name || "-"}</td>
-                    <td className="p-2 md:p-3">{s.gender || "-"}</td>
-                    <td className="p-2 md:p-3">{s.classTeaching || "-"}</td>
-                    <td className="p-2 md:p-3">{s.ustadh || "-"}</td>
-                    <td className="p-2 md:p-3">{s.dateJoined || "-"}</td>
-                    <td className="p-2 md:p-3">{s.location || "-"}</td>
-                    <td className="p-2 md:p-3">{s.madrassaLocation || "-"}</td>
-                    <td className="p-2 md:p-3">{s.shoeSize || "-"}</td>
-                    <td className="p-2 md:p-3">{s.cell || "-"}</td>
-                  </tr>
-                ))}
-                {filteredStudents.length === 0 && !loading && (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-xs md:text-sm min-w-[900px] border-collapse">
+                <thead className="bg-gray-100 text-gray-600">
                   <tr>
-                    <td colSpan="10" className="p-4 text-center text-gray-500 text-sm">
-                      {search ? "No students found matching your search" : "No students found"}
-                    </td>
+                    <th className="p-2 md:p-3 text-left">ID</th>
+                    <th className="p-2 md:p-3 text-left">Name</th>
+                    <th className="p-2 md:p-3 text-left">Gender</th>
+                    <th className="p-2 md:p-3 text-left">Class</th>
+                    <th className="p-2 md:p-3 text-left">Teacher</th>
+                    <th className="p-2 md:p-3 text-left">Date Joined</th>
+                    <th className="p-2 md:p-3 text-left">Home Location</th>
+                    <th className="p-2 md:p-3 text-left">Madrassa</th>
+                    <th className="p-2 md:p-3 text-left">Shoe Size</th>
+                    <th className="p-2 md:p-3 text-left">Cell</th>
                   </tr>
+                </thead>
+                <tbody>
+                  {filteredStudents.map((s) => (
+                    <tr key={s.id} className="border-b hover:bg-gray-50">
+                      <td className="p-2 md:p-3">{s.studentId || "-"}</td>
+                      <td className="p-2 md:p-3">{s.name || "-"}</td>
+                      <td className="p-2 md:p-3">{s.gender || "-"}</td>
+                      <td className="p-2 md:p-3">{s.classTeaching || "-"}</td>
+                      <td className="p-2 md:p-3">{s.ustadh || "-"}</td>
+                      <td className="p-2 md:p-3">{s.dateJoined || "-"}</td>
+                      <td className="p-2 md:p-3">{s.location || "-"}</td>
+                      <td className="p-2 md:p-3">{s.madrassaLocation || "-"}</td>
+                      <td className="p-2 md:p-3">{s.shoeSize || "-"}</td>
+                      <td className="p-2 md:p-3">{s.cell || "-"}</td>
+                    </tr>
+                  ))}
+                  {filteredStudents.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan="10" className="p-4 text-center text-gray-500 text-sm">
+                        {search ? "No students found matching your search" : "No students found"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View - Professional & Compact */}
+            <div className="md:hidden">
+              {/* Results count for mobile */}
+              <div className="mb-3 text-sm text-gray-600">
+                Showing {filteredStudents.length} student{filteredStudents.length !== 1 ? 's' : ''}
+              </div>
+
+              <div className="space-y-3">
+                {filteredStudents.map((s) => (
+                  <div key={s.id} className="border rounded-lg bg-white shadow-sm overflow-hidden">
+                    {/* Header Section - Most Important Info */}
+                    <div className="bg-gradient-to-r from-emerald-50 to-blue-50 p-3 border-b">
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 text-sm">{s.name || "-"}</h3>
+                          <p className="text-xs text-gray-600">ID: {s.studentId || "-"}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs font-medium">
+                            {s.gender || "-"}
+                          </span>
+                          {s.shoeSize && (
+                            <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">
+                              Size {s.shoeSize}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Details Section - Grid Layout */}
+                    <div className="p-3 bg-gray-50">
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                        {/* Left Column */}
+                        <div>
+                          <p className="text-gray-500 font-medium mb-0.5">Class</p>
+                          <p className="text-gray-900">{s.classTeaching || "-"}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium mb-0.5">Teacher</p>
+                          <p className="text-gray-900">{s.ustadh || "-"}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium mb-0.5">Joined</p>
+                          <p className="text-gray-900">{s.dateJoined || "-"}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium mb-0.5">Cell</p>
+                          <p className="text-gray-900">{s.cell || "-"}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Location Info - Full Width */}
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                          <div>
+                            <p className="text-gray-500 font-medium">Home</p>
+                            <p className="text-gray-900">{s.location || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 font-medium">Madrassa</p>
+                            <p className="text-gray-900">{s.madrassaLocation || "-"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {filteredStudents.length === 0 && !loading && (
+                  <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-lg">
+                    {search ? "No students found matching your search" : "No students found"}
+                  </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
@@ -130,4 +210,3 @@ function LearnersSummary() {
 }
 
 export default LearnersSummary;
-
