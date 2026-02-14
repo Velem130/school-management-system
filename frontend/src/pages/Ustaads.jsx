@@ -196,60 +196,110 @@ function Ustaads() {
             <p className="mt-2 text-gray-600">Loading ustaads...</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-100 text-gray-600">
-              <tr>
-                <th className="p-3 text-left">Full Name</th>
-                <th className="p-3 text-left">Class</th>
-                <th className="p-3 text-left">Center</th>
-                <th className="p-3 text-left">Phone</th>
-                <th className="p-3 text-left"># Students</th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100 text-gray-600">
+                  <tr>
+                    <th className="p-3 text-left">Full Name</th>
+                    <th className="p-3 text-left">Class</th>
+                    <th className="p-3 text-left">Center</th>
+                    <th className="p-3 text-left">Phone</th>
+                    <th className="p-3 text-left"># Students</th>
+                    <th className="p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ustaads.map((u) => (
+                    <tr key={u.id} className="border-b">
+                      <td className="p-3">{u.fullName}</td>
+                      <td className="p-3">{u.classTeaching}</td>
+                      <td className="p-3">{u.center}</td>
+                      <td className="p-3">{u.phone}</td>
+                      <td className="p-3">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                          {u.numStudents}
+                        </span>
+                      </td>
+                      <td className="p-3 space-x-2">
+                        <button
+                          onClick={() => handleEdit(u)}
+                          className="text-blue-600 hover:text-blue-800"
+                          disabled={loading}
+                        >
+                          Update
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u.id)}
+                          className="text-red-600 hover:text-red-800"
+                          disabled={loading}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {ustaads.length === 0 && !loading && (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="p-4 text-center text-gray-500"
+                      >
+                        No Ustaads added yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
               {ustaads.map((u) => (
-                <tr key={u.id} className="border-b">
-                  <td className="p-3">{u.fullName}</td>
-                  <td className="p-3">{u.classTeaching}</td>
-                  <td className="p-3">{u.center}</td>
-                  <td className="p-3">{u.phone}</td>
-                  <td className="p-3">
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
-                      {u.numStudents}
-                    </span>
-                  </td>
-                  <td className="p-3 space-x-2">
+                <div key={u.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="space-y-2 mb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-gray-800">{u.fullName}</p>
+                        <p className="text-sm text-gray-600">{u.classTeaching}</p>
+                      </div>
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                        {u.numStudents} students
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <p><span className="font-medium">Center:</span> {u.center}</p>
+                      <p><span className="font-medium">Phone:</span> {u.phone}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-3 border-t">
                     <button
                       onClick={() => handleEdit(u)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
                       disabled={loading}
                     >
                       Update
                     </button>
                     <button
                       onClick={() => handleDelete(u.id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-sm font-medium"
                       disabled={loading}
                     >
                       Delete
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
 
               {ustaads.length === 0 && !loading && (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="p-4 text-center text-gray-500"
-                  >
-                    No Ustaads added yet
-                  </td>
-                </tr>
+                <div className="p-8 text-center text-gray-500">
+                  No Ustaads added yet
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>
@@ -257,4 +307,3 @@ function Ustaads() {
 }
 
 export default Ustaads;
-
