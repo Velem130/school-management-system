@@ -82,41 +82,75 @@ function AdultSummary() {
             <p className="mt-2 text-gray-600 text-sm md:text-base">Loading adult students...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs md:text-sm min-w-[600px] border-collapse">
-              <thead className="bg-gray-100 text-gray-600">
-                <tr>
-                  <th className="p-2 md:p-3 text-left">ID</th>
-                  <th className="p-2 md:p-3 text-left">Name</th>
-                  <th className="p-2 md:p-3 text-left">Gender</th>
-                  <th className="p-2 md:p-3 text-left">Class</th>
-                  <th className="p-2 md:p-3 text-left">Teacher</th>
-                  <th className="p-2 md:p-3 text-left">Location</th>
-                  <th className="p-2 md:p-3 text-left">Cell</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudents.map((s) => (
-                  <tr key={s.id} className="border-b">
-                    <td className="p-2 md:p-3">{s.studentId}</td>
-                    <td className="p-2 md:p-3">{s.name}</td>
-                    <td className="p-2 md:p-3">{s.gender}</td>
-                    <td className="p-2 md:p-3">{s.classTeaching}</td>
-                    <td className="p-2 md:p-3">{s.ustadh}</td>
-                    <td className="p-2 md:p-3">{s.location}</td>
-                    <td className="p-2 md:p-3">{s.cell}</td>
-                  </tr>
-                ))}
-                {filteredStudents.length === 0 && !loading && (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-xs md:text-sm min-w-[600px] border-collapse">
+                <thead className="bg-gray-100 text-gray-600">
                   <tr>
-                    <td colSpan="7" className="p-4 text-center text-gray-500 text-sm">
-                      {search ? "No adult students found matching your search" : "No adult students found"}
-                    </td>
+                    <th className="p-2 md:p-3 text-left">ID</th>
+                    <th className="p-2 md:p-3 text-left">Name</th>
+                    <th className="p-2 md:p-3 text-left">Gender</th>
+                    <th className="p-2 md:p-3 text-left">Class</th>
+                    <th className="p-2 md:p-3 text-left">Teacher</th>
+                    <th className="p-2 md:p-3 text-left">Location</th>
+                    <th className="p-2 md:p-3 text-left">Cell</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredStudents.map((s) => (
+                    <tr key={s.id} className="border-b">
+                      <td className="p-2 md:p-3">{s.studentId}</td>
+                      <td className="p-2 md:p-3">{s.name}</td>
+                      <td className="p-2 md:p-3">{s.gender}</td>
+                      <td className="p-2 md:p-3">{s.classTeaching}</td>
+                      <td className="p-2 md:p-3">{s.ustadh}</td>
+                      <td className="p-2 md:p-3">{s.location}</td>
+                      <td className="p-2 md:p-3">{s.cell}</td>
+                    </tr>
+                  ))}
+                  {filteredStudents.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan="7" className="p-4 text-center text-gray-500 text-sm">
+                        {search ? "No adult students found matching your search" : "No adult students found"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {filteredStudents.map((s) => (
+                <div key={s.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-gray-800">{s.name}</p>
+                        <p className="text-sm text-gray-600">ID: {s.studentId}</p>
+                      </div>
+                      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
+                        {s.gender}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 space-y-1 pt-2 border-t">
+                      <p><span className="font-medium">Class:</span> {s.classTeaching}</p>
+                      <p><span className="font-medium">Teacher:</span> {s.ustadh}</p>
+                      <p><span className="font-medium">Location:</span> {s.location}</p>
+                      <p><span className="font-medium">Cell:</span> {s.cell}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {filteredStudents.length === 0 && !loading && (
+                <div className="p-8 text-center text-gray-500">
+                  {search ? "No adult students found matching your search" : "No adult students found"}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
