@@ -232,7 +232,26 @@ function MenList() {
   };
 
   const handleDeleteTeacher = async (id) => {
-    if (!window.confirm("Delete this teacher? All their members will also be removed!")) return;
+    const teacherToDelete = teachers.find(t => t.id === id);
+    if (!teacherToDelete) return;
+
+    // Check if teacher has any members
+    const memberCount = getStudentCountForTeacher(teacherToDelete.name);
+
+    if (memberCount > 0) {
+      alert(
+        `Cannot delete teacher "${teacherToDelete.name}".\n\n` +
+        `This teacher still has ${memberCount} active member${memberCount === 1 ? '' : 's'}.\n\n` +
+        "Please delete all members first before deleting the teacher."
+      );
+      return;
+    }
+
+    if (!window.confirm(
+      `Delete teacher "${teacherToDelete.name}"?\n` +
+      "This teacher has no active members.\n" +
+      "This action cannot be undone."
+    )) return;
     
     try {
       await menTeacherApi.deleteTeacher(id);
@@ -241,15 +260,8 @@ function MenList() {
       const updatedTeachers = teachers.filter((t) => t.id !== id);
       setTeachers(updatedTeachers);
       
-      // Remove students of this teacher from local state
-      const teacherToDelete = teachers.find(t => t.id === id);
-      if (teacherToDelete) {
-        const updatedStudents = students.filter((s) => s.ustadh !== teacherToDelete.name);
-        setStudents(updatedStudents);
-      }
-      
       if (currentTeacher?.id === id) setCurrentTeacher(null);
-      alert("Teacher and their members deleted successfully!");
+      alert("Teacher deleted successfully!");
     } catch (error) {
       alert(error.message || "Failed to delete teacher");
     }

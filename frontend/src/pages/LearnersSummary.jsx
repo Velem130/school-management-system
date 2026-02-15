@@ -6,7 +6,7 @@ function LearnersSummary() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Load students from database
+  
   useEffect(() => {
     const loadStudents = async () => {
       setLoading(true);
@@ -149,7 +149,7 @@ function LearnersSummary() {
                           </span>
                           {s.shoeSize && (
                             <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">
-                              Size {s.shoeSize}
+                              shoes Size {s.shoeSize}
                             </span>
                           )}
                         </div>
@@ -169,7 +169,7 @@ function LearnersSummary() {
                           <p className="text-gray-900">{s.ustadh || "-"}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500 font-medium mb-0.5">Joined</p>
+                          <p className="text-gray-500 font-medium mb-0.5">Date Joined</p>
                           <p className="text-gray-900">{s.dateJoined || "-"}</p>
                         </div>
                         <div>

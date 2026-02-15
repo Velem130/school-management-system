@@ -101,13 +101,13 @@ function UstaadsSummary() {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-semibold text-gray-800">{u.fullName}</p>
-                        <p className="text-sm text-gray-600">{u.classTeaching}</p>
                       </div>
                       <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                         {u.numStudents} students
                       </span>
                     </div>
                     <div className="text-sm text-gray-600 space-y-1 pt-2">
+                      <p><span className="font-medium">Class Teaching:</span> {u.classTeaching}</p>
                       <p><span className="font-medium">Center:</span> {u.center}</p>
                       <p><span className="font-medium">Phone:</span> {u.phone}</p>
                     </div>

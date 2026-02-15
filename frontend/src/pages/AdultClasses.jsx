@@ -187,33 +187,28 @@ function AdultClasses() {
     }
   };
 
-  // Delete teacher function
+  // Delete teacher function with security check
   const handleDeleteTeacher = async (teacherId) => {
-    const teacher = teachers.find(t => t.id === teacherId);
-    const teacherStudents = students.filter(s => s.ustadh === teacher.name);
-    
-    if (teacherStudents.length > 0) {
-      if (!window.confirm(`This Ustaadh has ${teacherStudents.length} learner(s). Deleting will also remove all associated learners. Are you sure?`)) {
-        return;
-      }
-      
-      // Remove students associated with this teacher
-      for (const student of teacherStudents) {
-        try {
-          await adultStudentApi.deleteStudent(student.id);
-        } catch (error) {
-          console.error("Failed to delete student:", error);
-        }
-      }
-      
-      // Update local state
-      const updatedStudents = students.filter(s => s.ustadh !== teacher.name);
-      setStudents(updatedStudents);
-    } else {
-      if (!window.confirm("Delete this Adult Ustaadh?")) {
-        return;
-      }
+    const teacherToDelete = teachers.find(t => t.id === teacherId);
+    if (!teacherToDelete) return;
+
+    // Check if teacher has any learners
+    const learnerCount = getStudentCountForTeacher(teacherToDelete.name);
+
+    if (learnerCount > 0) {
+      alert(
+        `Cannot delete Adult Ustaadh "${teacherToDelete.name}".\n\n` +
+        `This Ustaadh still has ${learnerCount} active learner${learnerCount === 1 ? '' : 's'}.\n\n` +
+        "Please delete all learners first before deleting the Ustaadh."
+      );
+      return;
     }
+
+    if (!window.confirm(
+      `Delete Adult Ustaadh "${teacherToDelete.name}"?\n` +
+      "This Ustaadh has no active learners.\n" +
+      "This action cannot be undone."
+    )) return;
     
     try {
       await adultTeacherApi.deleteTeacher(teacherId);

@@ -7,7 +7,7 @@ function ExcludedKids() {
   const [excludedLastYear, setExcludedLastYear] = useState([]);
   const [excludedTwoYearsAgo, setExcludedTwoYearsAgo] = useState([]);
 
-  const [teachers, setTeachers] = useState([]);           // Now used ONLY for restore modal
+  const [teachers, setTeachers] = useState([]);           
   const [ustaadhFilterOptions, setUstaadhFilterOptions] = useState([]); // NEW: unique teachers from exclusions
 
   const [showRestoreModal, setShowRestoreModal] = useState(false);

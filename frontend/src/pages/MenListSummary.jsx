@@ -25,9 +25,8 @@ function MenListSummary() {
     loadStudents();
   }, []);
 
-  // Filter students based on search (by ID or name)
+  // Filter students based on search (by name only now)
   const filteredStudents = students.filter((s) =>
-    s.studentId.toLowerCase().includes(search.toLowerCase()) ||
     s.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -43,7 +42,7 @@ function MenListSummary() {
       <div className="mb-4 md:mb-6">
         <input
           type="text"
-          placeholder="Search by ID or Name..."
+          placeholder="Search by Name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded w-full md:w-1/3 text-sm md:text-base"
@@ -88,11 +87,9 @@ function MenListSummary() {
               <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100 text-gray-600">
                   <tr>
-                    <th className="p-3 text-left">ID</th>
                     <th className="p-3 text-left">Name</th>
                     <th className="p-3 text-left">Gender</th>
-                    <th className="p-3 text-left">Class</th>
-                    <th className="p-3 text-left">Teacher</th>
+                    <th className="p-3 text-left">Date Joined</th>
                     <th className="p-3 text-left">Location</th>
                     <th className="p-3 text-left">Cell</th>
                   </tr>
@@ -100,18 +97,16 @@ function MenListSummary() {
                 <tbody>
                   {filteredStudents.map((s) => (
                     <tr key={s.id} className="border-b">
-                      <td className="p-3">{s.studentId}</td>
                       <td className="p-3">{s.name}</td>
                       <td className="p-3">{s.gender}</td>
-                      <td className="p-3">{s.classTeaching}</td>
-                      <td className="p-3">{s.ustadh}</td>
+                      <td className="p-3">{s.dateJoined}</td>
                       <td className="p-3">{s.location}</td>
                       <td className="p-3">{s.cell}</td>
                     </tr>
                   ))}
                   {filteredStudents.length === 0 && !loading && (
                     <tr>
-                      <td colSpan="7" className="p-4 text-center text-gray-500">
+                      <td colSpan="5" className="p-4 text-center text-gray-500">
                         {search ? "No members found matching your search" : "No members found"}
                       </td>
                     </tr>
@@ -128,15 +123,13 @@ function MenListSummary() {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-semibold text-gray-800">{s.name}</p>
-                        <p className="text-sm text-gray-600">ID: {s.studentId}</p>
                       </div>
                       <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs">
                         {s.gender}
                       </span>
                     </div>
                     <div className="text-sm text-gray-600 space-y-1 pt-2 border-t">
-                      <p><span className="font-medium">Class:</span> {s.classTeaching}</p>
-                      <p><span className="font-medium">Teacher:</span> {s.ustadh}</p>
+                      <p><span className="font-medium">Joined:</span> {s.dateJoined}</p>
                       <p><span className="font-medium">Location:</span> {s.location}</p>
                       <p><span className="font-medium">Cell:</span> {s.cell}</p>
                     </div>
