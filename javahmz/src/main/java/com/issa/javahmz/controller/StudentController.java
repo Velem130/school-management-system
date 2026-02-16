@@ -161,13 +161,9 @@ public class StudentController {
             @RequestParam String newClassTeaching) {
         try {
             studentService.updateStudentsClass(ustadh, oldClassTeaching, newClassTeaching);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "All students updated to new class successfully");
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.ok("All students updated to new class successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 

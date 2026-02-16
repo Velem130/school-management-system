@@ -15,14 +15,11 @@ function Students() {
     dateJoined: "",
     location: "",
     madrassaLocation: "",
-    
     shoeSize: "",
     cell: "",
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [teacherCountsLoading, setTeacherCountsLoading] = useState(false);
-
   // Transfer modal states
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [studentToTransfer, setStudentToTransfer] = useState(null);
@@ -32,7 +29,6 @@ function Students() {
     transferredBy: "",
     notes: "",
   });
-
   // Exclusion modal states
   const [showExcludeModal, setShowExcludeModal] = useState(false);
   const [studentToExclude, setStudentToExclude] = useState(null);
@@ -54,12 +50,10 @@ function Students() {
     loadTeachers();
   }, []);
 
-  // Load real student counts for all teachers
+  // Load real student counts (still run in background but NOT displayed)
   useEffect(() => {
     const loadStudentCounts = async () => {
       if (teachers.length === 0) return;
-      
-      setTeacherCountsLoading(true);
       try {
         const updatedTeachers = await Promise.all(
           teachers.map(async (teacher) => {
@@ -75,25 +69,22 @@ function Students() {
         setTeachers(updatedTeachers);
       } catch (error) {
         console.error("Failed to load teacher student counts:", error);
-      } finally {
-        setTeacherCountsLoading(false);
       }
     };
-
     loadStudentCounts();
   }, [teachers.length]);
 
-  // Load students for current teacher
+  // Load students for current teacher (by name only - no class filter)
   useEffect(() => {
     if (currentTeacher) {
-      loadStudentsForTeacher(currentTeacher.name, currentTeacher.classTeaching);
+      loadStudentsForTeacher(currentTeacher.name);
     }
   }, [currentTeacher]);
 
-  const loadStudentsForTeacher = async (teacherName, classTeaching) => {
+  const loadStudentsForTeacher = async (teacherName) => {
     setLoading(true);
     try {
-      const teacherStudents = await studentApi.getStudentsByTeacherAndClass(teacherName, classTeaching);
+      const teacherStudents = await studentApi.getStudentsByTeacher(teacherName);
       setStudents(teacherStudents);
     } catch (error) {
       console.error("Failed to load students:", error);
@@ -103,63 +94,106 @@ function Students() {
     }
   };
 
-  // Add or select teacher
+  // Add or select teacher - STRENGTHENED DUPLICATE CHECK + NUMBERS & & ONLY FOR CLASS
   const handleAddTeacher = async () => {
     if (!formTeacher.name || !formTeacher.classTeaching) {
       alert("Please fill both fields");
       return;
     }
 
+    // Normalize input
+    const rawName = formTeacher.name.trim();
+    const inputName = rawName.toUpperCase();
+    const normalizedInput = rawName.replace(/\s+/g, ' ').trim().toUpperCase();
+    const inputClass = formTeacher.classTeaching.trim();
+
+    // Validate class: only numbers and & allowed (e.g. 1&2&3)
+    if (!/^[0-9&]+$/.test(inputClass)) {
+      alert("Class Teaching must contain only numbers and & (e.g. 3, 1&2, 2&5). No letters, spaces, or other symbols allowed.");
+      return;
+    }
+
+    // If editing existing teacher → SKIP similar-name check (allow class change)
     if (editingTeacherId) {
       try {
         const oldTeacher = teachers.find(t => t.id === editingTeacherId);
-        const updatedTeacher = await teacherApi.updateTeacher(editingTeacherId, formTeacher);
+        const updatedTeacher = await teacherApi.updateTeacher(editingTeacherId, {
+          name: inputName,
+          classTeaching: inputClass
+        });
 
-        if (updatedTeacher.classTeaching !== oldTeacher.classTeaching) {
-          await fetch(`${API_BASE_URL}/students/update-class?ustadh=${encodeURIComponent(updatedTeacher.name)}&oldClassTeaching=${encodeURIComponent(oldTeacher.classTeaching)}&newClassTeaching=${encodeURIComponent(updatedTeacher.classTeaching)}`, {
-            method: 'PUT',
-          });
+        // Optional: move students' class label if needed (comment out if not wanted)
+        // if (updatedTeacher.classTeaching !== oldTeacher.classTeaching) {
+        //   const response = await fetch(
+        //     `${API_BASE_URL}/students/update-class?ustadh=${encodeURIComponent(inputName)}&oldClassTeaching=${encodeURIComponent(oldTeacher.classTeaching)}&newClassTeaching=${encodeURIComponent(inputClass)}`,
+        //     { method: 'PUT' }
+        //   );
+        //   if (!response.ok) {
+        //     const err = await response.json();
+        //     throw new Error(err.message || "Failed to move students to new class");
+        //   }
+        // }
+
+        // Reload teachers list
+        const refreshedTeachers = await teacherApi.getAllTeachers();
+        setTeachers(refreshedTeachers);
+
+        // Reload current teacher's students if affected
+        if (currentTeacher && currentTeacher.id === editingTeacherId) {
+          setCurrentTeacher(updatedTeacher);
+          await loadStudentsForTeacher(inputName);
         }
 
-        const updatedTeachers = teachers.map((t) =>
-          t.id === editingTeacherId ? updatedTeacher : t
-        );
-        setTeachers(updatedTeachers);
-        setCurrentTeacher(updatedTeacher);
         setEditingTeacherId(null);
         setFormTeacher({ name: "", classTeaching: "" });
         alert("Teacher updated successfully!");
       } catch (error) {
+        console.error("Update error:", error);
         alert(error.message || "Failed to update teacher");
       }
       return;
     }
 
+    // For NEW teacher or access → keep strong duplicate check
     const exactExists = teachers.find(
-      (t) =>
-        t.name.toLowerCase() === formTeacher.name.toLowerCase() &&
-        t.classTeaching === formTeacher.classTeaching
+      (t) => {
+        const tNameNormalized = t.name.trim().replace(/\s+/g, ' ').trim().toUpperCase();
+        return tNameNormalized === normalizedInput && t.classTeaching.trim() === inputClass;
+      }
     );
+
     if (exactExists) {
       setCurrentTeacher(exactExists);
       setIsNewTeacher(false);
-      alert(`Welcome back ${formTeacher.name}! Accessing class ${formTeacher.classTeaching}.`);
+      alert(`Welcome back ${exactExists.name}! Accessing class ${exactExists.classTeaching}.`);
       setFormTeacher({ name: "", classTeaching: "" });
       return;
     }
 
-    if (isNewTeacher) {
-      const nameExists = teachers.find(
-        (t) => t.name.toLowerCase() === formTeacher.name.toLowerCase()
+    const similarNameExists = teachers.find((t) => {
+      const tNameNormalized = t.name.trim().replace(/\s+/g, ' ').trim().toUpperCase();
+      return tNameNormalized === normalizedInput;
+    });
+
+    if (similarNameExists) {
+      alert(
+        `A teacher with very similar name "${similarNameExists.name}" already exists!\n\n` +
+        `Please use the exact same name as before (${similarNameExists.name}) to avoid splitting your students.\n\n` +
+        `If this is you, just select the existing entry above.`
       );
-      if (nameExists) {
-        alert(`Teacher "${formTeacher.name}" already exists! If this is you, please use the exact same name and class. Otherwise, use a different name.`);
-        return;
-      }
+      return;
+    }
+
+    // New teacher registration
+    if (isNewTeacher) {
       try {
-        const newTeacher = await teacherApi.createTeacher(formTeacher);
-        setTeachers([...teachers, newTeacher]);
-        setCurrentTeacher(newTeacher);
+        const newTeacher = await teacherApi.createTeacher({
+          name: inputName,
+          classTeaching: inputClass
+        });
+        const normalizedNew = { ...newTeacher, name: inputName };
+        setTeachers([...teachers, normalizedNew]);
+        setCurrentTeacher(normalizedNew);
         setFormTeacher({ name: "", classTeaching: "" });
         alert("New teacher registered! Now you can add your students.");
       } catch (error) {
@@ -167,13 +201,14 @@ function Students() {
       }
     } else {
       try {
-        const teacher = await teacherApi.accessTeacher(formTeacher.name, formTeacher.classTeaching);
-        setCurrentTeacher(teacher);
+        const teacher = await teacherApi.accessTeacher(inputName, inputClass);
+        const normalizedTeacher = { ...teacher, name: inputName };
+        setCurrentTeacher(normalizedTeacher);
         const alreadyInList = teachers.find(t => t.id === teacher.id);
         if (!alreadyInList) {
-          setTeachers([...teachers, teacher]);
+          setTeachers([...teachers, normalizedTeacher]);
         }
-        alert(`Welcome back ${teacher.name}! Accessing class ${teacher.classTeaching}.`);
+        alert(`Welcome back ${normalizedTeacher.name}! Accessing class ${normalizedTeacher.classTeaching}.`);
         setFormTeacher({ name: "", classTeaching: "" });
       } catch (error) {
         alert(error.message || "Teacher not found. Please check your name and class.");
@@ -181,7 +216,7 @@ function Students() {
     }
   };
 
-  // Add/update student
+  // Add/update student (unchanged)
   const handleSubmitStudent = async () => {
     if (
       !formStudent.studentId ||
@@ -195,11 +230,9 @@ function Students() {
       alert("Please fill all required fields");
       return;
     }
-
     if (!editingId) {
       try {
         const duplicateCheck = await duplicateCheckApi.checkStudentId(formStudent.studentId);
-
         if (duplicateCheck.existsInStudents) {
           alert(
             `Cannot register: Student ID "${formStudent.studentId}" is already used in an ACTIVE student!\n` +
@@ -207,7 +240,6 @@ function Students() {
           );
           return;
         }
-
         if (duplicateCheck.existsInExcluded) {
           alert(
             `Cannot register: Student ID "${formStudent.studentId}" is in the EXCLUDED list!\n` +
@@ -222,13 +254,11 @@ function Students() {
         return;
       }
     }
-
     const studentData = {
       ...formStudent,
       ustadh: currentTeacher.name,
       classTeaching: currentTeacher.classTeaching,
     };
-
     try {
       if (editingId) {
         const updatedStudent = await studentApi.updateStudent(editingId, studentData);
@@ -244,14 +274,12 @@ function Students() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(studentData),
         });
-
         if (!response.ok) {
           let errorData;
           try {
             errorData = await response.json();
           } catch {}
           const errorMessage = errorData?.message || 'Failed to create student';
-
           if (errorMessage.includes('already exists') || errorMessage.includes('Unique index') || errorMessage.includes('constraint') || errorMessage.includes('excluded')) {
             alert(
               `Cannot add student: ID "${formStudent.studentId}" is already used or was previously excluded!\n` +
@@ -262,12 +290,10 @@ function Students() {
           }
           return;
         }
-
         const newStudent = await response.json();
         setStudents([...students, newStudent]);
         alert("Student added successfully!");
       }
-
       setFormStudent({
         studentId: "",
         name: "",
@@ -317,7 +343,6 @@ function Students() {
       alert("Please select new teacher");
       return;
     }
-
     try {
       const response = await fetch(`${API_BASE_URL}/students/transfer/${studentToTransfer.id}`, {
         method: 'POST',
@@ -329,7 +354,6 @@ function Students() {
           notes: transferData.notes
         }),
       });
-
       if (!response.ok) {
         let errorMessage = "Failed to transfer student";
         try {
@@ -338,12 +362,9 @@ function Students() {
         } catch {}
         throw new Error(errorMessage);
       }
-
       const updatedStudents = students.filter((s) => s.id !== studentToTransfer.id);
       setStudents(updatedStudents);
-
-      await loadStudentsForTeacher(currentTeacher.name, currentTeacher.classTeaching);
-
+      await loadStudentsForTeacher(currentTeacher.name);
       setShowTransferModal(false);
       setStudentToTransfer(null);
       setTransferData({
@@ -352,7 +373,6 @@ function Students() {
         transferredBy: "",
         notes: "",
       });
-
       alert(`Student transferred successfully to ${transferData.newUstadh} - ${transferData.newClassTeaching}`);
     } catch (error) {
       console.error("Transfer error:", error);
@@ -378,7 +398,6 @@ function Students() {
         exclusionType,
         additionalNotes
       );
-
       const updatedStudents = students.filter((s) => s.id !== studentToExclude.id);
       setStudents(updatedStudents);
       setShowExcludeModal(false);
@@ -386,7 +405,6 @@ function Students() {
       setExclusionReason("");
       setAdditionalNotes("");
       setExclusionType("transfer");
-
       alert(`Student excluded successfully. Reason: ${exclusionReason}`);
     } catch (error) {
       alert(error.message || "Failed to exclude student");
@@ -402,10 +420,8 @@ function Students() {
   const handleDeleteTeacher = async (id) => {
     const teacherToDelete = teachers.find(t => t.id === id);
     if (!teacherToDelete) return;
-
     try {
       const studentCount = await studentApi.countStudentsByTeacher(teacherToDelete.name);
-
       if (studentCount > 0) {
         alert(
           `Cannot delete teacher "${teacherToDelete.name}".\n\n` +
@@ -414,20 +430,15 @@ function Students() {
         );
         return;
       }
-
       if (!window.confirm(
         `Delete teacher "${teacherToDelete.name}"?\n` +
         "This teacher has no active students.\n" +
         "This action cannot be undone."
       )) return;
-
       await teacherApi.deleteTeacher(id);
-
       const updatedTeachers = teachers.filter(t => t.id !== id);
       setTeachers(updatedTeachers);
-
       if (currentTeacher?.id === id) setCurrentTeacher(null);
-
       alert("Teacher deleted successfully!");
     } catch (error) {
       alert(error.message || "Failed to delete teacher");
@@ -435,7 +446,7 @@ function Students() {
   };
 
   const myStudents = currentTeacher
-    ? students.filter((s) => s.ustadh === currentTeacher.name && s.classTeaching === currentTeacher.classTeaching)
+    ? students.filter((s) => s.ustadh === currentTeacher.name)
     : [];
 
   const selectExistingTeacher = (teacher) => {
@@ -447,7 +458,7 @@ function Students() {
     <div className="pt-10 md:pt-0 px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl sm:text-3xl font-bold mb-6">Students Management</h1>
 
-      {/* Teacher Selection / Registration - Responsive */}
+      {/* Teacher Selection / Registration */}
       {!currentTeacher && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm">
@@ -469,12 +480,24 @@ function Students() {
                   </p>
                 )}
               </div>
-              <input
-                placeholder="Class Teaching *"
-                value={formTeacher.classTeaching}
-                onChange={(e) => setFormTeacher({ ...formTeacher, classTeaching: e.target.value })}
-                className="border p-2.5 rounded w-full text-sm sm:text-base"
-              />
+              <div>
+                <input
+                  placeholder="Class(es) (numbers & only) * e.g. 1&2"
+                  value={formTeacher.classTeaching}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || /^[0-9&]+$/.test(value)) { // only digits and &
+                      setFormTeacher({ ...formTeacher, classTeaching: value });
+                    } else {
+                      alert("Class must contain only numbers and & (e.g. 3, 1&2, 2&5). No letters, spaces, or other symbols.");
+                    }
+                  }}
+                  className="border p-2.5 rounded w-full text-sm sm:text-base"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Use numbers and & for multiple classes (e.g. 1&2&3)
+                </p>
+              </div>
             </div>
             <div className="flex items-center mb-4">
               <input
@@ -515,10 +538,7 @@ function Students() {
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-medium">{t.name}</div>
-                      <div className="text-gray-600">Class: {t.classTeaching}</div>
-                    </div>
-                    <div className="text-xs sm:text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      {teacherCountsLoading ? "..." : (t.studentCount ?? 0)}
+                      <div className="text-gray-600">Class(es): {t.classTeaching}</div>
                     </div>
                   </div>
                 </div>
@@ -536,7 +556,7 @@ function Students() {
         </div>
       )}
 
-      {/* Student Management Section - Responsive */}
+      {/* Student Management Section */}
       {currentTeacher && (
         <div className="mb-8">
           <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm mb-8">
@@ -566,7 +586,7 @@ function Students() {
               </div>
             </div>
 
-            {/* Student Form - Responsive grid */}
+            {/* Student Form */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               <input
                 placeholder="ID Number *"
@@ -620,11 +640,9 @@ function Students() {
                 className="border p-2.5 rounded w-full text-sm sm:text-base"
               />
             </div>
-
             <p className="text-xs sm:text-sm text-gray-500 mb-4">
               * ID numbers must be **globally unique forever** — cannot be reused even after exclusion.
             </p>
-
             <button
               onClick={handleSubmitStudent}
               className="bg-emerald-700 text-white px-4 py-2.5 rounded hover:bg-emerald-800 w-full sm:w-auto text-sm sm:text-base"
@@ -634,7 +652,7 @@ function Students() {
             </button>
           </div>
 
-          {/* Current Teacher Students Table - Responsive */}
+          {/* Current Teacher Students Table */}
           <div className="bg-white rounded-xl shadow-sm p-5 sm:p-6 mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
               <h2 className="font-semibold text-lg sm:text-xl">{currentTeacher.name}'s Students</h2>
@@ -748,7 +766,6 @@ function Students() {
                       </div>
                     </div>
                   ))}
-
                   {myStudents.length === 0 && !loading && (
                     <div className="p-8 text-center text-gray-500">
                       No students added yet
@@ -761,18 +778,16 @@ function Students() {
         </div>
       )}
 
-      {/* All Registered Teachers Table - Responsive */}
+      {/* All Registered Teachers Table */}
       <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm">
         <h2 className="font-semibold mb-4 text-lg sm:text-xl">All Registered Teachers</h2>
-        
-        {/* Desktop Table View */}
+
         <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100 text-gray-600">
               <tr>
                 <th className="px-3 py-3 text-left text-xs font-medium">Teacher Name</th>
-                <th className="px-3 py-3 text-left text-xs font-medium">Class</th>
-                <th className="px-3 py-3 text-left text-xs font-medium">Students</th>
+                <th className="px-3 py-3 text-left text-xs font-medium">Class(es)</th>
                 <th className="px-3 py-3 text-left text-xs font-medium">Actions</th>
               </tr>
             </thead>
@@ -781,11 +796,6 @@ function Students() {
                 <tr key={t.id} className="hover:bg-gray-50">
                   <td className="px-3 py-4 whitespace-nowrap text-sm">{t.name}</td>
                   <td className="px-3 py-4 whitespace-nowrap text-sm">{t.classTeaching}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {teacherCountsLoading ? "..." : (t.studentCount ?? 0)}
-                    </span>
-                  </td>
                   <td className="px-3 py-4 whitespace-nowrap text-sm space-x-3">
                     <button onClick={() => handleEditTeacher(t)} className="text-blue-600 hover:text-blue-800">
                       Update
@@ -798,7 +808,7 @@ function Students() {
               ))}
               {teachers.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="px-3 py-4 text-center text-gray-500 text-sm">
+                  <td colSpan="3" className="px-3 py-4 text-center text-gray-500 text-sm">
                     No teachers registered yet
                   </td>
                 </tr>
@@ -807,7 +817,6 @@ function Students() {
           </table>
         </div>
 
-        {/* Mobile Card View */}
         <div className="md:hidden space-y-4">
           {teachers.map((t) => (
             <div key={t.id} className="border rounded-lg p-4 bg-gray-50">
@@ -815,11 +824,8 @@ function Students() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-semibold text-gray-800">{t.name}</p>
-                    <p className="text-sm text-gray-600">Class: {t.classTeaching}</p>
+                    <p className="text-sm text-gray-600">Class(es): {t.classTeaching}</p>
                   </div>
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                    {teacherCountsLoading ? "..." : (t.studentCount ?? 0)} students
-                  </span>
                 </div>
               </div>
               <div className="flex gap-2 pt-3 border-t">
@@ -838,7 +844,6 @@ function Students() {
               </div>
             </div>
           ))}
-
           {teachers.length === 0 && (
             <div className="p-8 text-center text-gray-500">
               No teachers registered yet
@@ -847,7 +852,7 @@ function Students() {
         </div>
       </div>
 
-      {/* Transfer Modal - Responsive */}
+      {/* Transfer Modal */}
       {showTransferModal && studentToTransfer && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4 overflow-y-auto max-h-[90vh]">
@@ -914,7 +919,7 @@ function Students() {
         </div>
       )}
 
-      {/* Exclusion Modal - Responsive */}
+      {/* Exclusion Modal */}
       {showExcludeModal && studentToExclude && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4 overflow-y-auto max-h-[90vh]">

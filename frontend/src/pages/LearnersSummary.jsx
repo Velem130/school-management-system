@@ -5,42 +5,94 @@ function LearnersSummary() {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedTeacher, setSelectedTeacher] = useState("All Students"); // New state for filter
 
-  
+  // Load students
+  const loadStudents = async () => {
+    setLoading(true);
+    try {
+      const data = await studentApi.getAllStudents();
+      setStudents(data);
+    } catch (error) {
+      console.error("Failed to load students:", error);
+      alert("Failed to load students from server.");
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadStudents = async () => {
-      setLoading(true);
-      try {
-        const data = await studentApi.getAllStudents();
-        setStudents(data);
-      } catch (error) {
-        console.error("Failed to load students:", error);
-        alert("Failed to load students from server.");
-        setStudents([]);
-      } finally {
-        setLoading(false);
+    loadStudents();
+  }, [refreshTrigger]);
+
+  // Listen for storage events
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'studentDataChanged' || e.key === 'teacherDataChanged') {
+        setRefreshTrigger(prev => prev + 1);
       }
     };
 
-    loadStudents();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Filter students based on search (by ID or name)
-  const filteredStudents = students.filter((s) =>
-    s.studentId.toLowerCase().includes(search.toLowerCase()) ||
-    s.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-  // Gender counts
+  // Get unique teachers + special options
+  const uniqueTeachers = ["All Students", "Unassigned"];
+  students.forEach(student => {
+    if (student.ustadh && !uniqueTeachers.includes(student.ustadh)) {
+      uniqueTeachers.push(student.ustadh);
+    }
+  });
+
+  // Filter students: search + teacher filter
+  const filteredStudents = students.filter((s) => {
+    const matchesSearch =
+      s.studentId?.toLowerCase().includes(search.toLowerCase()) ||
+      s.name?.toLowerCase().includes(search.toLowerCase());
+
+    if (selectedTeacher === "All Students") {
+      return matchesSearch;
+    }
+
+    if (selectedTeacher === "Unassigned") {
+      return matchesSearch && (!s.ustadh || s.ustadh.trim() === "" || s.ustadh.toLowerCase() === "n/a");
+    }
+
+    return matchesSearch && s.ustadh === selectedTeacher;
+  });
+
+  // Gender counts (based on filtered list)
   const totalMale = filteredStudents.filter((s) => s.gender === "Male").length;
   const totalFemale = filteredStudents.filter((s) => s.gender === "Female").length;
 
   return (
     <div className="p-4 md:p-8">
-      <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Learners Summary</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-4">
+        <h1 className="text-xl md:text-2xl font-bold">Learners Summary</h1>
+        <button
+          onClick={() => setRefreshTrigger(prev => prev + 1)}
+          className="bg-emerald-600 text-white px-3 py-1 rounded text-sm hover:bg-emerald-700 flex items-center gap-1"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
 
-      {/* Search Input */}
-      <div className="mb-4 md:mb-6">
+      {/* Search + Teacher Filter */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 md:mb-6">
         <input
           type="text"
           placeholder="Search by ID or Name..."
@@ -48,6 +100,19 @@ function LearnersSummary() {
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded w-full text-sm md:text-base"
         />
+        <select
+          value={selectedTeacher}
+          onChange={(e) => setSelectedTeacher(e.target.value)}
+          className="border p-2 rounded w-full text-sm md:text-base bg-white"
+        >
+          {uniqueTeachers.map((teacher) => (
+            <option key={teacher} value={teacher}>
+              {teacher === "All Students" ? "All Students" : 
+               teacher === "Unassigned" ? "Unassigned / No Teacher" : 
+               `Teacher: ${teacher}`}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Summary Totals */}
@@ -72,9 +137,13 @@ function LearnersSummary() {
         </div>
       </div>
 
-      {/* Students Table - NOW SHOWS ALL FIELDS */}
+      {/* Students Table - unchanged except using filteredStudents */}
       <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">All Students (Full Details)</h2>
+        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">
+          {selectedTeacher === "All Students" ? "All Students" :
+           selectedTeacher === "Unassigned" ? "Unassigned Students" :
+           `Students of ${selectedTeacher}`} (Full Details)
+        </h2>
         
         {loading ? (
           <div className="text-center py-6 md:py-8">
@@ -118,7 +187,7 @@ function LearnersSummary() {
                   {filteredStudents.length === 0 && !loading && (
                     <tr>
                       <td colSpan="10" className="p-4 text-center text-gray-500 text-sm">
-                        {search ? "No students found matching your search" : "No students found"}
+                        {search ? "No students found matching your search" : `No students found for "${selectedTeacher}"`}
                       </td>
                     </tr>
                   )}
@@ -126,9 +195,8 @@ function LearnersSummary() {
               </table>
             </div>
 
-            {/* Mobile Card View - Professional & Compact */}
+            {/* Mobile Card View - unchanged */}
             <div className="md:hidden">
-              {/* Results count for mobile */}
               <div className="mb-3 text-sm text-gray-600">
                 Showing {filteredStudents.length} student{filteredStudents.length !== 1 ? 's' : ''}
               </div>
@@ -136,7 +204,6 @@ function LearnersSummary() {
               <div className="space-y-3">
                 {filteredStudents.map((s) => (
                   <div key={s.id} className="border rounded-lg bg-white shadow-sm overflow-hidden">
-                    {/* Header Section - Most Important Info */}
                     <div className="bg-gradient-to-r from-emerald-50 to-blue-50 p-3 border-b">
                       <div className="flex justify-between items-start mb-1">
                         <div className="flex-1">
@@ -149,17 +216,15 @@ function LearnersSummary() {
                           </span>
                           {s.shoeSize && (
                             <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">
-                              shoes Size {s.shoeSize}
+                              Shoe Size {s.shoeSize}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Details Section - Grid Layout */}
                     <div className="p-3 bg-gray-50">
                       <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-                        {/* Left Column */}
                         <div>
                           <p className="text-gray-500 font-medium mb-0.5">Class</p>
                           <p className="text-gray-900">{s.classTeaching || "-"}</p>
@@ -177,8 +242,6 @@ function LearnersSummary() {
                           <p className="text-gray-900">{s.cell || "-"}</p>
                         </div>
                       </div>
-                      
-                      {/* Location Info - Full Width */}
                       <div className="mt-2 pt-2 border-t border-gray-200">
                         <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
                           <div>
@@ -197,7 +260,7 @@ function LearnersSummary() {
 
                 {filteredStudents.length === 0 && !loading && (
                   <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-lg">
-                    {search ? "No students found matching your search" : "No students found"}
+                    {search ? "No students found matching your search" : `No students found for "${selectedTeacher}"`}
                   </div>
                 )}
               </div>
