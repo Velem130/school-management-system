@@ -43,7 +43,7 @@ function LearnersSummary() {
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTrigger(prev => prev + 1);
-    }, 30000);
+    }, 300000);
     return () => clearInterval(interval);
   }, []);
 
