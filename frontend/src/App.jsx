@@ -13,7 +13,8 @@ import Students from "./pages/Students";
 import Ustaads from "./pages/Ustaads";
 import AdultClasses from "./pages/AdultClasses";
 import MenList from "./pages/MenList";
-import ExcludedKids from "./pages/ExcludedKids"; 
+import ExcludedKids from "./pages/ExcludedKids";
+import StudentsPDF from "./pages/StudentsPDF";
 
 function App() {
   return (
@@ -40,7 +41,8 @@ function App() {
           <Route path="/ustaads" element={<Ustaads />} />
           <Route path="/adult-classes" element={<AdultClasses />} />
           <Route path="/menlist" element={<MenList />} />
-          <Route path="/excluded-kids" element={<ExcludedKids />} /> 
+          <Route path="/excluded-kids" element={<ExcludedKids />} />
+          <Route path="/students-pdf" element={<StudentsPDF />} />
         </Routes>
       </div>
     </div>
@@ -48,7 +50,3 @@ function App() {
 }
 
 export default App;
-
-
-
-

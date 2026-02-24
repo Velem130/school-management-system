@@ -8,12 +8,14 @@ function Sidebar() {
   const toggleSidebar = () => setIsOpen(!isOpen);
   const closeSidebar = () => setIsOpen(false);
 
+  // Added the PDF link to this array
   const links = [
     { path: "/", label: "Dashboard" },
     { path: "/students", label: "Student Roll" },
     { path: "/ustaads", label: "Ustaads" },
     { path: "/adult-classes", label: "Adult Classes" },
-    { path: "/menlist", label: "Men's List" }
+    { path: "/menlist", label: "Men's List" },
+    { path: "/students-pdf", label: "Download PDF" } // <--- Added this line
   ];
 
   return (
