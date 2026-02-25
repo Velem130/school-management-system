@@ -144,7 +144,7 @@ function MenList() {
     }
   };
 
-  // Step 2: Add/update member
+  // Step 2: Add/update member - FIXED DUPLICATE CHECKING
   const handleSubmitStudent = async () => {
     if (
       !formStudent.name ||
@@ -157,22 +157,47 @@ function MenList() {
       return;
     }
 
+    // Normalize the name for comparison (trim spaces, uppercase)
+    const normalizedName = formStudent.name.trim().toUpperCase();
+
+    // Check if member with same name already exists GLOBALLY (case insensitive, trimmed)
+    if (!editingId) {
+      const duplicateExists = students.find(
+        (s) => s.name.trim().toUpperCase() === normalizedName
+      );
+
+      if (duplicateExists) {
+        alert(
+          `Member "${formStudent.name}" already exists!\n\n` +
+          `This name is already registered by: ${duplicateExists.ustadh}\n` +
+          `Class: ${duplicateExists.classTeaching}\n\n` +
+          `Please use a different name or check if this is a duplicate entry.`
+        );
+        return;
+      }
+    } else {
+      // When editing, check if the new name conflicts with another member (excluding current one)
+      const duplicateExists = students.find(
+        (s) => s.id !== editingId && s.name.trim().toUpperCase() === normalizedName
+      );
+
+      if (duplicateExists) {
+        alert(
+          `Cannot update: Member "${formStudent.name}" already exists!\n\n` +
+          `This name is already registered by: ${duplicateExists.ustadh}\n` +
+          `Class: ${duplicateExists.classTeaching}\n\n` +
+          `Please use a different name.`
+        );
+        return;
+      }
+    }
+
     // Generate a unique student ID based on timestamp
     const studentId = `M${Date.now()}`;
 
-    // Check if member with same name already exists (case insensitive)
-    const studentExists = students.find(
-      (s) => 
-        s.name.toLowerCase() === formStudent.name.toLowerCase()
-    );
-
-    if (studentExists && !editingId) {
-      alert(`Member "${formStudent.name}" is already registered!`);
-      return;
-    }
-
     const studentData = {
       ...formStudent,
+      name: formStudent.name.trim(), // Trim the name before saving
       studentId: editingId ? formStudent.studentId : studentId,
       ustadh: currentTeacher.name,
       classTeaching: currentTeacher.classTeaching,
@@ -447,7 +472,7 @@ function MenList() {
               />
             </div>
             <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
-              * Member names must be unique across all classes
+              * Member names must be unique across all classes (system-wide)
             </p>
             <button
               onClick={handleSubmitStudent}

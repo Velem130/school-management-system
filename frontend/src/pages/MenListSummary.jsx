@@ -5,6 +5,7 @@ function MenListSummary() {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedTeacher, setSelectedTeacher] = useState("All Members"); // New state for filter
 
   // Load men students from database
   useEffect(() => {
@@ -25,12 +26,30 @@ function MenListSummary() {
     loadStudents();
   }, []);
 
-  // Filter students based on search (by name only now)
-  const filteredStudents = students.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Get unique teachers + special options
+  const uniqueTeachers = ["All Members", "Unassigned"];
+  students.forEach(student => {
+    if (student.ustadh && !uniqueTeachers.includes(student.ustadh)) {
+      uniqueTeachers.push(student.ustadh);
+    }
+  });
 
-  // Gender counts
+  // Filter students: search + teacher filter
+  const filteredStudents = students.filter((s) => {
+    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase());
+
+    if (selectedTeacher === "All Members") {
+      return matchesSearch;
+    }
+
+    if (selectedTeacher === "Unassigned") {
+      return matchesSearch && (!s.ustadh || s.ustadh.trim() === "" || s.ustadh.toLowerCase() === "n/a");
+    }
+
+    return matchesSearch && s.ustadh === selectedTeacher;
+  });
+
+  // Gender counts (based on filtered list)
   const totalMale = filteredStudents.filter((s) => s.gender === "Male").length;
   const totalFemale = filteredStudents.filter((s) => s.gender === "Female").length;
 
@@ -38,15 +57,28 @@ function MenListSummary() {
     <div className="p-4 md:p-8">
       <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Men's List Summary</h1>
 
-      {/* Search Input */}
-      <div className="mb-4 md:mb-6">
+      {/* Search + Teacher Filter */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 md:mb-6">
         <input
           type="text"
           placeholder="Search by Name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full md:w-1/3 text-sm md:text-base"
+          className="border p-2 rounded w-full text-sm md:text-base"
         />
+        <select
+          value={selectedTeacher}
+          onChange={(e) => setSelectedTeacher(e.target.value)}
+          className="border p-2 rounded w-full text-sm md:text-base bg-white"
+        >
+          {uniqueTeachers.map((teacher) => (
+            <option key={teacher} value={teacher}>
+              {teacher === "All Members" ? "All Members" : 
+               teacher === "Unassigned" ? "Unassigned / No Teacher" : 
+               `Registered by: ${teacher}`}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Summary Totals */}
@@ -73,7 +105,11 @@ function MenListSummary() {
 
       {/* Students Table */}
       <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">All Members</h2>
+        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">
+          {selectedTeacher === "All Members" ? "All Members" :
+           selectedTeacher === "Unassigned" ? "Unassigned Members" :
+           `Members registered by ${selectedTeacher}`}
+        </h2>
         
         {loading ? (
           <div className="text-center py-8">
@@ -107,7 +143,7 @@ function MenListSummary() {
                   {filteredStudents.length === 0 && !loading && (
                     <tr>
                       <td colSpan="5" className="p-4 text-center text-gray-500">
-                        {search ? "No members found matching your search" : "No members found"}
+                        {search ? "No members found matching your search" : `No members found for "${selectedTeacher}"`}
                       </td>
                     </tr>
                   )}
@@ -139,7 +175,7 @@ function MenListSummary() {
 
               {filteredStudents.length === 0 && !loading && (
                 <div className="p-8 text-center text-gray-500">
-                  {search ? "No members found matching your search" : "No members found"}
+                  {search ? "No members found matching your search" : `No members found for "${selectedTeacher}"`}
                 </div>
               )}
             </div>
