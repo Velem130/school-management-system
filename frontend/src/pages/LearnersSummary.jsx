@@ -54,6 +54,13 @@ function LearnersSummary() {
       uniqueTeachers.push(student.ustadh);
     }
   });
+  
+  // Sort teachers alphabetically (keep "All Students" and "Unassigned" at the top)
+  const sortedTeachers = [
+    "All Students",
+    "Unassigned",
+    ...uniqueTeachers.slice(2).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+  ];
 
   // Filter students: search + teacher filter
   const filteredStudents = students.filter((s) => {
@@ -105,7 +112,7 @@ function LearnersSummary() {
           onChange={(e) => setSelectedTeacher(e.target.value)}
           className="border p-2 rounded w-full text-sm md:text-base bg-white"
         >
-          {uniqueTeachers.map((teacher) => (
+          {sortedTeachers.map((teacher) => (
             <option key={teacher} value={teacher}>
               {teacher === "All Students" ? "All Students" : 
                teacher === "Unassigned" ? "Unassigned / No Teacher" : 
