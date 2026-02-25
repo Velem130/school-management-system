@@ -5,6 +5,7 @@ function AdultSummary() {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedTeacher, setSelectedTeacher] = useState("All Learners"); // New state for filter
 
   // Load adult students from database
   useEffect(() => {
@@ -25,13 +26,32 @@ function AdultSummary() {
     loadStudents();
   }, []);
 
-  // Filter students based on search (by ID or name)
-  const filteredStudents = students.filter((s) =>
-    s.studentId.toLowerCase().includes(search.toLowerCase()) ||
-    s.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Get unique teachers + special options
+  const uniqueTeachers = ["All Learners", "Unassigned"];
+  students.forEach(student => {
+    if (student.ustadh && !uniqueTeachers.includes(student.ustadh)) {
+      uniqueTeachers.push(student.ustadh);
+    }
+  });
 
-  // Gender counts
+  // Filter students: search + teacher filter
+  const filteredStudents = students.filter((s) => {
+    const matchesSearch =
+      s.studentId?.toLowerCase().includes(search.toLowerCase()) ||
+      s.name?.toLowerCase().includes(search.toLowerCase());
+
+    if (selectedTeacher === "All Learners") {
+      return matchesSearch;
+    }
+
+    if (selectedTeacher === "Unassigned") {
+      return matchesSearch && (!s.ustadh || s.ustadh.trim() === "" || s.ustadh.toLowerCase() === "n/a");
+    }
+
+    return matchesSearch && s.ustadh === selectedTeacher;
+  });
+
+  // Gender counts (based on filtered list)
   const totalMale = filteredStudents.filter((s) => s.gender === "Male").length;
   const totalFemale = filteredStudents.filter((s) => s.gender === "Female").length;
 
@@ -39,8 +59,8 @@ function AdultSummary() {
     <div className="pt-10 pb-10 px-4 md:px-8">
       <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Adult Classes Summary</h1>
 
-      {/* Search Input */}
-      <div className="mb-4 md:mb-6">
+      {/* Search + Teacher Filter */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 md:mb-6">
         <input
           type="text"
           placeholder="Search by ID or Name..."
@@ -48,6 +68,19 @@ function AdultSummary() {
           onChange={(e) => setSearch(e.target.value)}
           className="border p-2 rounded w-full text-sm md:text-base"
         />
+        <select
+          value={selectedTeacher}
+          onChange={(e) => setSelectedTeacher(e.target.value)}
+          className="border p-2 rounded w-full text-sm md:text-base bg-white"
+        >
+          {uniqueTeachers.map((teacher) => (
+            <option key={teacher} value={teacher}>
+              {teacher === "All Learners" ? "All Learners" : 
+               teacher === "Unassigned" ? "Unassigned / No Teacher" : 
+               `Taught by: ${teacher}`}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Summary Totals */}
@@ -74,7 +107,11 @@ function AdultSummary() {
 
       {/* Students Table */}
       <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">All Adult Students</h2>
+        <h2 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">
+          {selectedTeacher === "All Learners" ? "All Adult Learners" :
+           selectedTeacher === "Unassigned" ? "Unassigned Adult Learners" :
+           `Adult learners taught by ${selectedTeacher}`}
+        </h2>
         
         {loading ? (
           <div className="text-center py-6 md:py-8">
@@ -112,7 +149,7 @@ function AdultSummary() {
                   {filteredStudents.length === 0 && !loading && (
                     <tr>
                       <td colSpan="7" className="p-4 text-center text-gray-500 text-sm">
-                        {search ? "No adult students found matching your search" : "No adult students found"}
+                        {search ? "No adult students found matching your search" : `No adult students found for "${selectedTeacher}"`}
                       </td>
                     </tr>
                   )}
@@ -146,7 +183,7 @@ function AdultSummary() {
 
               {filteredStudents.length === 0 && !loading && (
                 <div className="p-8 text-center text-gray-500">
-                  {search ? "No adult students found matching your search" : "No adult students found"}
+                  {search ? "No adult students found matching your search" : `No adult students found for "${selectedTeacher}"`}
                 </div>
               )}
             </div>
