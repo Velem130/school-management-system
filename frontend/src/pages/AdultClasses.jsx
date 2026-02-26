@@ -23,6 +23,7 @@ function AdultClasses() {
   const [editingId, setEditingId] = useState(null);
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // NEW: Separate state for form submission
 
   useEffect(() => {
     loadTeachers();
@@ -226,8 +227,14 @@ function AdultClasses() {
     }
   };
 
-  // Step 2: Add / Update Adult Student
+  // Step 2: Add / Update Adult Student - WITH DOUBLE-CLICK PROTECTION
   const handleSubmitStudent = async () => {
+    // 🔒 PREVENT DOUBLE SUBMISSION
+    if (isSubmitting) {
+      console.log("Already submitting, ignoring duplicate click");
+      return;
+    }
+
     if (
       !formStudent.studentId ||
       !formStudent.name ||
@@ -240,35 +247,40 @@ function AdultClasses() {
       return;
     }
 
-    // Check if student with same ID number already exists
-    const idExists = students.find(
-      (s) => s.studentId === formStudent.studentId
-    );
-
-    if (idExists && !editingId) {
-      alert(`Adult learner with ID number "${formStudent.studentId}" is already registered!`);
-      return;
-    }
-
-    // Check if student with same name AND ID already exists (case insensitive)
-    const studentExists = students.find(
-      (s) => 
-        s.name.toLowerCase() === formStudent.name.toLowerCase() &&
-        s.studentId === formStudent.studentId
-    );
-
-    if (studentExists && !editingId) {
-      alert(`Adult learner "${formStudent.name}" with ID "${formStudent.studentId}" is already registered!`);
-      return;
-    }
-
-    const studentData = {
-      ...formStudent,
-      ustadh: currentTeacher.name,
-      classTeaching: currentTeacher.classTeaching,
-    };
+    // 🔒 LOCK THE BUTTON IMMEDIATELY
+    setIsSubmitting(true);
 
     try {
+      // Check if student with same ID number already exists
+      const idExists = students.find(
+        (s) => s.studentId === formStudent.studentId
+      );
+
+      if (idExists && !editingId) {
+        alert(`Adult learner with ID number "${formStudent.studentId}" is already registered!`);
+        setIsSubmitting(false); // 🔒 UNLOCK on error
+        return;
+      }
+
+      // Check if student with same name AND ID already exists (case insensitive)
+      const studentExists = students.find(
+        (s) => 
+          s.name.toLowerCase() === formStudent.name.toLowerCase() &&
+          s.studentId === formStudent.studentId
+      );
+
+      if (studentExists && !editingId) {
+        alert(`Adult learner "${formStudent.name}" with ID "${formStudent.studentId}" is already registered!`);
+        setIsSubmitting(false); // 🔒 UNLOCK on error
+        return;
+      }
+
+      const studentData = {
+        ...formStudent,
+        ustadh: currentTeacher.name,
+        classTeaching: currentTeacher.classTeaching,
+      };
+
       if (editingId) {
         const updatedStudent = await adultStudentApi.updateStudent(editingId, studentData);
         const updated = students.map((s) =>
@@ -293,6 +305,9 @@ function AdultClasses() {
       });
     } catch (error) {
       alert(error.message || "Failed to save adult student");
+    } finally {
+      // 🔒 ALWAYS UNLOCK when done (success or error)
+      setIsSubmitting(false);
     }
   };
 
@@ -551,10 +566,20 @@ function AdultClasses() {
 
             <button
               onClick={handleSubmitStudent}
-              disabled={loading}
-              className="bg-emerald-700 text-white px-4 py-2 rounded disabled:opacity-50 text-sm md:text-base w-full sm:w-auto"
+              disabled={isSubmitting}
+              className="bg-emerald-700 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base w-full sm:w-auto"
             >
-              {loading ? "Processing..." : editingId ? "Update" : "Add"}
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </span>
+              ) : (
+                editingId ? "Update" : "Add"
+              )}
             </button>
           </div>
 
