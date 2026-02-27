@@ -35,7 +35,7 @@ function StudentsPDF() {
     setLoading(true);
     try {
       const teacherStudents = await studentApi.getStudentsByTeacher(teacherName);
-      const sortedStudents = teacherStudents.sort((a, b) => 
+      const sortedStudents = teacherStudents.sort((a, b) =>
         a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
       );
       setStudents(sortedStudents);
@@ -56,7 +56,7 @@ function StudentsPDF() {
 
   const generatePDF = async () => {
     setIsGeneratingPDF(true);
-    
+
     try {
       const pdf = new jsPDF({
         orientation: 'landscape',
@@ -65,97 +65,108 @@ function StudentsPDF() {
       });
 
       const pageWidth = 297;
-      const ITEMS_PER_PAGE = 15; 
-      const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE);
+      const ITEMS_FIRST_PAGE = 28;
+      const ITEMS_OTHER_PAGES = 38;
+
+      // Calculate total pages
+      let totalPages = 1;
+      if (students.length > ITEMS_FIRST_PAGE) {
+        totalPages = 1 + Math.ceil((students.length - ITEMS_FIRST_PAGE) / ITEMS_OTHER_PAGES);
+      }
 
       for (let pageNum = 0; pageNum < totalPages; pageNum++) {
+        const startIdx = pageNum === 0
+          ? 0
+          : ITEMS_FIRST_PAGE + (pageNum - 1) * ITEMS_OTHER_PAGES;
+        const endIdx = pageNum === 0
+          ? Math.min(ITEMS_FIRST_PAGE, students.length)
+          : Math.min(startIdx + ITEMS_OTHER_PAGES, students.length);
+        const pageStudents = students.slice(startIdx, endIdx);
+
         const pdfContainer = document.createElement('div');
         pdfContainer.style.position = 'absolute';
         pdfContainer.style.left = '-9999px';
         pdfContainer.style.width = '297mm';
-        pdfContainer.style.padding = '10mm';
+        pdfContainer.style.padding = '5mm 10mm';
         pdfContainer.style.backgroundColor = 'white';
         pdfContainer.style.fontFamily = 'Arial, sans-serif';
-        
-        const startIdx = pageNum * ITEMS_PER_PAGE;
-        const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, students.length);
-        const pageStudents = students.slice(startIdx, endIdx);
+        pdfContainer.style.color = '#000';
 
         pdfContainer.innerHTML = `
           <div style="width: 100%; max-width: 277mm; margin: 0 auto;">
-            
+
             ${pageNum === 0 ? `
-              <div style="text-align: center; margin-bottom: 20px;">
-                <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 20px; border-radius: 10px; color: white;">
-                  <h1 style="margin: 0; font-size: 28px; font-weight: bold;">BBIC Management</h1>
-                  <p style="margin: 5px 0 0 0; font-size: 16px;">Class Roster - Page 1 of ${totalPages}</p>
+              <!-- Compact Header -->
+              <div style="border-bottom: 2px solid #000; padding-bottom: 3px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                  <h1 style="margin: 0; font-size: 16px; font-weight: bold; color: #000;">BBIC Management — Class Roster</h1>
+                  <p style="margin: 2px 0 0 0; font-size: 10px; color: #000;">
+                    Teacher: <strong>${currentTeacher.name}</strong> &nbsp;|&nbsp;
+                    Class: <strong>${currentTeacher.classTeaching}</strong> &nbsp;|&nbsp;
+                    Total: <strong>${students.length}</strong> &nbsp;|&nbsp;
+                    Male: <strong>${maleCount}</strong> &nbsp;|&nbsp;
+                    Female: <strong>${femaleCount}</strong> &nbsp;|&nbsp;
+                    Date: <strong>${new Date().toLocaleDateString()}</strong>
+                  </p>
                 </div>
+                <p style="margin: 0; font-size: 9px; color: #555;">Page 1 of ${totalPages}</p>
               </div>
-              
-              <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <p style="margin: 0; color: #6b7280; font-size: 12px;">Teacher</p>
-                    <h2 style="margin: 5px 0 0 0; font-size: 20px; color: #1f2937;">${currentTeacher.name}</h2>
-                  </div>
-                  <div style="text-align: right;">
-                    <p style="margin: 0; color: #6b7280; font-size: 12px;">Class(es)</p>
-                    <h3 style="margin: 5px 0 0 0; font-size: 18px; color: #1f2937;">${currentTeacher.classTeaching}</h3>
-                  </div>
-                </div>
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #d1d5db;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <div><p style="margin: 0; color: #6b7280; font-size: 10px;">Total Students</p><p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: #059669;">${students.length}</p></div>
-                    <div style="text-align: center;"><p style="margin: 0; color: #6b7280; font-size: 10px;">Male Students</p><p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: #3b82f6;">${maleCount}</p></div>
-                    <div style="text-align: center;"><p style="margin: 0; color: #6b7280; font-size: 10px;">Female Students</p><p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: #ec4899;">${femaleCount}</p></div>
-                    <div><p style="margin: 0; color: #6b7280; font-size: 10px;">Generated</p><p style="margin: 5px 0 0 0; font-size: 12px; color: #1f2937;">${new Date().toLocaleDateString()}</p></div>
-                  </div>
-                </div>
+            ` : `
+              <!-- Subsequent page mini header -->
+              <div style="border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                <p style="margin: 0; font-size: 9px; color: #000;"><strong>${currentTeacher.name}</strong> — ${currentTeacher.classTeaching} (continued)</p>
+                <p style="margin: 0; font-size: 9px; color: #555;">Page ${pageNum + 1} of ${totalPages}</p>
               </div>
-            ` : ''}
-            
+            `}
+
+            <!-- Students Table -->
             <table style="width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed;">
               <thead>
-                ${pageNum === 0 ? `
-                  <tr style="background: #059669; color: white;">
-                    <th style="width: 3%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">#</th>
-                    <th style="width: 10%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">ID Number</th>
-                    <th style="width: 18%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">Name</th>
-                    <th style="width: 6%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">Gender</th>
-                    <th style="width: 8%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">Joined</th>
-                    <th style="width: 15%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">Home</th>
-                    <th style="width: 15%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">Madrassa</th>
-                    <th style="width: 5%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">Shoe</th>
-                    <th style="width: 20%; padding: 8px 4px; text-align: left; border: 1px solid #047857;">Cell</th>
-                  </tr>
-                ` : ''}
+                <tr style="background: #000; color: #fff;">
+                  <th style="width: 4%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">#</th>
+                  <th style="width: 10%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">ID Number</th>
+                  <th style="width: 20%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Student Name</th>
+                  <th style="width: 6%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">Gender</th>
+                  <th style="width: 8%;  padding: 4px 3px; text-align: left;   border: 1px solid #000;">Date Joined</th>
+                  <th style="width: 14%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Home Location</th>
+                  <th style="width: 16%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Madrassa</th>
+                  <th style="width: 5%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">Shoe</th>
+                  <th style="width: 17%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Cell Number</th>
+                </tr>
               </thead>
               <tbody>
                 ${pageStudents.map((student, index) => {
                   const globalIndex = startIdx + index + 1;
+                  const rowBg = globalIndex % 2 === 0 ? '#f2f2f2' : '#ffffff';
                   return `
-                    <tr style="background: ${globalIndex % 2 === 0 ? '#f9fafb' : 'white'};">
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${globalIndex}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${student.studentId || '-'}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb; font-weight: 500;">${student.name || '-'}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${student.gender || '-'}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${student.dateJoined || '-'}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${student.location || '-'}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${student.madrassaLocation || '-'}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${student.shoeSize || '-'}</td>
-                      <td style="padding: 6px 4px; border: 1px solid #e5e7eb;">${student.cell || '-'}</td>
+                    <tr style="background: ${rowBg};">
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${globalIndex}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.studentId || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; font-weight: 600;">${student.name || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${student.gender || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.dateJoined || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.location || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.madrassaLocation || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${student.shoeSize || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.cell || '-'}</td>
                     </tr>
                   `;
                 }).join('')}
               </tbody>
             </table>
-            
+
+            ${pageNum === totalPages - 1 ? `
+              <p style="margin-top: 6px; font-size: 8px; color: #555; text-align: right;">
+                End of roster — ${students.length} student(s) total
+              </p>
+            ` : ''}
+
           </div>
         `;
-        
+
         document.body.appendChild(pdfContainer);
         await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         const canvas = await html2canvas(pdfContainer, {
           scale: 2,
           useCORS: true,
@@ -163,20 +174,20 @@ function StudentsPDF() {
           backgroundColor: '#ffffff',
           windowWidth: 1200
         });
-        
+
         document.body.removeChild(pdfContainer);
         const imgData = canvas.toDataURL('image/png');
         const imgWidth = pageWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
+
         if (pageNum > 0) pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       }
-      
+
       const fileName = `${currentTeacher.name.replace(/\s+/g, '_')}_Class_${currentTeacher.classTeaching}_${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
       alert('PDF generated successfully!');
-      
+
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF.');
