@@ -14,7 +14,7 @@ function Sidebar() {
     { path: "/students", label: "Student Roll" },
     { path: "/ustaads", label: "Ustaads" },
     { path: "/adult-classes", label: "Ladies Classes" },
-    { path: "/menlist", label: "Men's List" },
+    { path: "/menlist", label: "Community's List" },
     { path: "/students-pdf", label: "Download PDF" } // <--- Added this line
   ];
 
