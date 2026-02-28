@@ -13,7 +13,7 @@ function Sidebar() {
     { path: "/", label: "Dashboard" },
     { path: "/students", label: "Student Roll" },
     { path: "/ustaads", label: "Ustaads" },
-    { path: "/adult-classes", label: "Adult Classes" },
+    { path: "/adult-classes", label: "Ladies Classes" },
     { path: "/menlist", label: "Men's List" },
     { path: "/students-pdf", label: "Download PDF" } // <--- Added this line
   ];
