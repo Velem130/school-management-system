@@ -146,7 +146,7 @@ function Dashboard() {
             <div className="text-4xl font-extrabold text-gray-900 mb-1">
               {loading ? "..." : stats.adultClasses.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-600 mb-4">Adult Learners</div>
+            <div className="text-sm text-gray-600 mb-4">Adult Ladies</div>
             <a href="/dashboard/adult-summary" className="text-purple-600 hover:text-purple-800 text-sm font-bold flex items-center gap-1">
               View Adults Summary →
             </a>
