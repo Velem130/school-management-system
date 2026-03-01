@@ -23,7 +23,9 @@ function AdultClasses() {
   const [editingId, setEditingId] = useState(null);
   const [editingTeacherId, setEditingTeacherId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // NEW: Separate state for form submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [studentSearch, setStudentSearch] = useState(""); // NEW: Search state
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false); // NEW: PDF generation state
 
   useEffect(() => {
     loadTeachers();
@@ -337,6 +339,165 @@ function AdultClasses() {
       )
     : [];
 
+  // NEW: Filter students by search
+  const filteredStudents = myStudents.filter((s) =>
+    s.name?.toLowerCase().includes(studentSearch.toLowerCase()) ||
+    s.studentId?.toLowerCase().includes(studentSearch.toLowerCase()) ||
+    s.cell?.toLowerCase().includes(studentSearch.toLowerCase())
+  );
+
+  // Sort alphabetically by name
+  const sortedStudents = filteredStudents.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  );
+
+  // Calculate gender counts
+  const maleCount = sortedStudents.filter(s => s.gender === 'Male').length;
+  const femaleCount = sortedStudents.filter(s => s.gender === 'Female').length;
+
+  // Generate PDF function - COMPACT DESIGN
+  const generatePDF = async () => {
+    setIsGeneratingPDF(true);
+    
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageWidth = 297;
+      const ITEMS_FIRST_PAGE = 28;
+      const ITEMS_OTHER_PAGES = 38;
+
+      // Calculate total pages
+      let totalPages = 1;
+      if (sortedStudents.length > ITEMS_FIRST_PAGE) {
+        totalPages = 1 + Math.ceil((sortedStudents.length - ITEMS_FIRST_PAGE) / ITEMS_OTHER_PAGES);
+      }
+
+      for (let pageNum = 0; pageNum < totalPages; pageNum++) {
+        const startIdx = pageNum === 0
+          ? 0
+          : ITEMS_FIRST_PAGE + (pageNum - 1) * ITEMS_OTHER_PAGES;
+        const endIdx = pageNum === 0
+          ? Math.min(ITEMS_FIRST_PAGE, sortedStudents.length)
+          : Math.min(startIdx + ITEMS_OTHER_PAGES, sortedStudents.length);
+        const pageStudents = sortedStudents.slice(startIdx, endIdx);
+
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.position = 'absolute';
+        pdfContainer.style.left = '-9999px';
+        pdfContainer.style.width = '297mm';
+        pdfContainer.style.padding = '5mm 10mm';
+        pdfContainer.style.backgroundColor = 'white';
+        pdfContainer.style.fontFamily = 'Arial, sans-serif';
+        pdfContainer.style.color = '#000';
+
+        pdfContainer.innerHTML = `
+          <div style="width: 100%; max-width: 277mm; margin: 0 auto;">
+
+            ${pageNum === 0 ? `
+              <!-- Compact Header -->
+              <div style="border-bottom: 2px solid #000; padding-bottom: 3px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                  <h1 style="margin: 0; font-size: 16px; font-weight: bold; color: #000;">BBIC Management — Adult Class Roster</h1>
+                  <p style="margin: 2px 0 0 0; font-size: 10px; color: #000;">
+                    Teacher: <strong>${currentTeacher.name}</strong> &nbsp;|&nbsp;
+                    Class: <strong>${currentTeacher.classTeaching}</strong> &nbsp;|&nbsp;
+                    Total: <strong>${sortedStudents.length}</strong> &nbsp;|&nbsp;
+                    Male: <strong>${maleCount}</strong> &nbsp;|&nbsp;
+                    Female: <strong>${femaleCount}</strong> &nbsp;|&nbsp;
+                    Date: <strong>${new Date().toLocaleDateString()}</strong>
+                  </p>
+                </div>
+                <p style="margin: 0; font-size: 9px; color: #555;">Page 1 of ${totalPages}</p>
+              </div>
+            ` : `
+              <!-- Subsequent page mini header -->
+              <div style="border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                <p style="margin: 0; font-size: 9px; color: #000;"><strong>${currentTeacher.name}</strong> — ${currentTeacher.classTeaching} (continued)</p>
+                <p style="margin: 0; font-size: 9px; color: #555;">Page ${pageNum + 1} of ${totalPages}</p>
+              </div>
+            `}
+
+            <!-- Learners Table -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed;">
+              <thead>
+                <tr style="background: #000; color: #fff;">
+                  <th style="width: 4%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">#</th>
+                  <th style="width: 12%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">ID Number</th>
+                  <th style="width: 28%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Learner Name</th>
+                  <th style="width: 8%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">Gender</th>
+                  <th style="width: 10%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Date Joined</th>
+                  <th style="width: 18%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Location</th>
+                  <th style="width: 20%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Cell Number</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pageStudents.map((student, index) => {
+                  const globalIndex = startIdx + index + 1;
+                  const rowBg = globalIndex % 2 === 0 ? '#f2f2f2' : '#ffffff';
+                  return `
+                    <tr style="background: ${rowBg};">
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${globalIndex}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.studentId || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; font-weight: 600;">${student.name || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${student.gender || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.dateJoined || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.location || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.cell || '-'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+
+            ${pageNum === totalPages - 1 ? `
+              <p style="margin-top: 6px; font-size: 8px; color: #555; text-align: right;">
+                End of roster — ${sortedStudents.length} learner(s) total
+              </p>
+            ` : ''}
+
+          </div>
+        `;
+
+        document.body.appendChild(pdfContainer);
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const canvas = await html2canvas(pdfContainer, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          windowWidth: 1200
+        });
+
+        document.body.removeChild(pdfContainer);
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        if (pageNum > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      }
+      
+      const fileName = `${currentTeacher.name.replace(/\s+/g, '_')}_Adult_Class_${currentTeacher.classTeaching}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+      
+      alert('PDF generated successfully!');
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   // Function to switch to existing teacher
   const selectExistingTeacher = (teacher) => {
     setCurrentTeacher(teacher);
@@ -484,16 +645,18 @@ function AdultClasses() {
                   {isNewTeacher ? "New ustaadh mode" : "Existing ustaadh mode"}
                 </p>
               </div>
-              <div className="flex items-center space-x-2 md:space-x-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div className="bg-emerald-100 text-emerald-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                   Adult Learners: {getStudentCountForTeacher(currentTeacher.name)}
                 </div>
+                {/* UPDATED: More visible Switch button */}
                 <button
                   onClick={() => {
                     setCurrentTeacher(null);
                     setFormTeacher({ name: "", classTeaching: "" });
+                    setStudentSearch(""); // Clear search when switching
                   }}
-                  className="text-gray-600 hover:text-gray-800 text-xs md:text-sm"
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                 >
                   Switch Ustaadh
                 </button>
@@ -588,9 +751,45 @@ function AdultClasses() {
               <h2 className="font-semibold text-base md:text-lg">
                 {currentTeacher.name}'s Adult Learners
               </h2>
-              <div className="bg-purple-100 text-purple-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
-                Total: {myStudents.length} learner{myStudents.length !== 1 ? 's' : ''}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <div className="bg-purple-100 text-purple-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
+                  Total: {myStudents.length} learner{myStudents.length !== 1 ? 's' : ''}
+                </div>
+                {/* NEW: PDF Download Button */}
+                <button
+                  onClick={generatePDF}
+                  disabled={isGeneratingPDF || loading || sortedStudents.length === 0}
+                  className="flex items-center gap-2 bg-purple-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-sm font-medium"
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <svg className="animate-spin h-3 w-3 md:h-4 md:w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download PDF
+                    </>
+                  )}
+                </button>
               </div>
+            </div>
+
+            {/* NEW: Search Bar */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="🔍 Search by name, ID, or cell number..."
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                className="border p-2.5 rounded w-full text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
             </div>
 
             {/* Desktop Table View */}
@@ -608,7 +807,7 @@ function AdultClasses() {
                   </tr>
                 </thead>
                 <tbody>
-                  {myStudents.map((s) => (
+                  {sortedStudents.map((s) => (
                     <tr key={s.id} className="border-b">
                       <td className="p-2">{s.studentId}</td>
                       <td className="p-2">{s.name}</td>
@@ -634,10 +833,10 @@ function AdultClasses() {
                       </td>
                     </tr>
                   ))}
-                  {myStudents.length === 0 && (
+                  {sortedStudents.length === 0 && (
                     <tr>
                       <td colSpan="7" className="p-4 text-center text-gray-500 text-sm">
-                        No adult learners yet
+                        {studentSearch ? "No learners found matching your search" : "No adult learners yet"}
                       </td>
                     </tr>
                   )}
@@ -647,7 +846,7 @@ function AdultClasses() {
 
             {/* Mobile Card View */}
             <div className="md:hidden space-y-4">
-              {myStudents.map((s) => (
+              {sortedStudents.map((s) => (
                 <div key={s.id} className="border rounded-lg p-4 bg-gray-50">
                   <div className="space-y-2 mb-3">
                     <div className="flex justify-between items-start">
@@ -684,9 +883,9 @@ function AdultClasses() {
                 </div>
               ))}
 
-              {myStudents.length === 0 && (
+              {sortedStudents.length === 0 && (
                 <div className="p-8 text-center text-gray-500">
-                  No adult learners yet
+                  {studentSearch ? "No learners found matching your search" : "No adult learners yet"}
                 </div>
               )}
             </div>
@@ -694,145 +893,147 @@ function AdultClasses() {
         </>
       )}
 
-      {/* All Registered Adult Ustaadhs Table with Actions */}
-      <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm mt-6 md:mt-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
-          <h2 className="font-semibold text-base md:text-lg">All Registered Adult Ustaadhs</h2>
-          <div className="text-xs md:text-sm text-gray-500">
-            Total: {teachers.length} Ustaadh{teachers.length !== 1 ? 's' : ''}
+      {/* All Registered Adult Ustaadhs Table - HIDDEN WHEN TEACHER IS LOGGED IN */}
+      {!currentTeacher && !editingTeacherId && (
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm mt-6 md:mt-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
+            <h2 className="font-semibold text-base md:text-lg">All Registered Adult Ustaadhs</h2>
+            <div className="text-xs md:text-sm text-gray-500">
+              Total: {teachers.length} Ustaadh{teachers.length !== 1 ? 's' : ''}
+            </div>
           </div>
-        </div>
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-            <p className="mt-2 text-gray-600 text-sm md:text-base">Loading adult ustaadhs...</p>
-          </div>
-        ) : (
-          <>
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-xs md:text-sm min-w-[600px]">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-2">Name</th>
-                    <th className="p-2">Class</th>
-                    <th className="p-2">Adult Learners</th>
-                    <th className="p-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {teachers.map((t) => {
-                    const studentCount = getStudentCountForTeacher(t.name);
-                    return (
-                      <tr key={t.id} className="border-b hover:bg-gray-50">
-                        <td className="p-2 font-medium">{t.name}</td>
-                        <td className="p-2">{t.classTeaching}</td>
-                        <td className="p-2">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
+              <p className="mt-2 text-gray-600 text-sm md:text-base">Loading adult ustaadhs...</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-xs md:text-sm min-w-[600px]">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="p-2">Name</th>
+                      <th className="p-2">Class</th>
+                      <th className="p-2">Adult Learners</th>
+                      <th className="p-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teachers.map((t) => {
+                      const studentCount = getStudentCountForTeacher(t.name);
+                      return (
+                        <tr key={t.id} className="border-b hover:bg-gray-50">
+                          <td className="p-2 font-medium">{t.name}</td>
+                          <td className="p-2">{t.classTeaching}</td>
+                          <td className="p-2">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              studentCount === 0 
+                                ? 'bg-gray-100 text-gray-600' 
+                                : 'bg-purple-100 text-purple-800'
+                            }`}>
+                              {studentCount} learner{studentCount !== 1 ? 's' : ''}
+                            </span>
+                          </td>
+                          <td className="p-2 space-x-1 md:space-x-2">
+                            <button
+                              onClick={() => handleEditTeacher(t)}
+                              className="text-blue-600 hover:text-blue-800 text-xs md:text-sm"
+                              disabled={loading}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTeacher(t.id)}
+                              className="text-red-600 hover:text-red-800 text-xs md:text-sm"
+                              disabled={loading}
+                            >
+                              Delete
+                            </button>
+                            <button
+                              onClick={() => selectExistingTeacher(t)}
+                              className="text-emerald-600 hover:text-emerald-800 text-xs md:text-sm"
+                              disabled={loading}
+                            >
+                              Access
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {teachers.length === 0 && !loading && (
+                      <tr>
+                        <td colSpan="4" className="p-4 text-center text-gray-500 text-sm">
+                          No adult ustaadhs registered
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {teachers.map((t) => {
+                  const studentCount = getStudentCountForTeacher(t.name);
+                  return (
+                    <div key={t.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="space-y-2 mb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold text-gray-800">{t.name}</p>
+                            <p className="text-sm text-gray-600">Class: {t.classTeaching}</p>
+                          </div>
+                          <span className={`px-2 py-1 rounded text-xs ${
                             studentCount === 0 
                               ? 'bg-gray-100 text-gray-600' 
                               : 'bg-purple-100 text-purple-800'
                           }`}>
                             {studentCount} learner{studentCount !== 1 ? 's' : ''}
                           </span>
-                        </td>
-                        <td className="p-2 space-x-1 md:space-x-2">
-                          <button
-                            onClick={() => handleEditTeacher(t)}
-                            className="text-blue-600 hover:text-blue-800 text-xs md:text-sm"
-                            disabled={loading}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTeacher(t.id)}
-                            className="text-red-600 hover:text-red-800 text-xs md:text-sm"
-                            disabled={loading}
-                          >
-                            Delete
-                          </button>
-                          <button
-                            onClick={() => selectExistingTeacher(t)}
-                            className="text-emerald-600 hover:text-emerald-800 text-xs md:text-sm"
-                            disabled={loading}
-                          >
-                            Access
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {teachers.length === 0 && !loading && (
-                    <tr>
-                      <td colSpan="4" className="p-4 text-center text-gray-500 text-sm">
-                        No adult ustaadhs registered
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="md:hidden space-y-4">
-              {teachers.map((t) => {
-                const studentCount = getStudentCountForTeacher(t.name);
-                return (
-                  <div key={t.id} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="space-y-2 mb-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-semibold text-gray-800">{t.name}</p>
-                          <p className="text-sm text-gray-600">Class: {t.classTeaching}</p>
                         </div>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          studentCount === 0 
-                            ? 'bg-gray-100 text-gray-600' 
-                            : 'bg-purple-100 text-purple-800'
-                        }`}>
-                          {studentCount} learner{studentCount !== 1 ? 's' : ''}
-                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 pt-3 border-t">
+                        <button
+                          onClick={() => handleEditTeacher(t)}
+                          className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-xs font-medium"
+                          disabled={loading}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTeacher(t.id)}
+                          className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-xs font-medium"
+                          disabled={loading}
+                        >
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => selectExistingTeacher(t)}
+                          className="bg-emerald-600 text-white px-3 py-2 rounded hover:bg-emerald-700 disabled:opacity-50 text-xs font-medium"
+                          disabled={loading}
+                        >
+                          Access
+                        </button>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 pt-3 border-t">
-                      <button
-                        onClick={() => handleEditTeacher(t)}
-                        className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-xs font-medium"
-                        disabled={loading}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTeacher(t.id)}
-                        className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 disabled:opacity-50 text-xs font-medium"
-                        disabled={loading}
-                      >
-                        Delete
-                      </button>
-                      <button
-                        onClick={() => selectExistingTeacher(t)}
-                        className="bg-emerald-600 text-white px-3 py-2 rounded hover:bg-emerald-700 disabled:opacity-50 text-xs font-medium"
-                        disabled={loading}
-                      >
-                        Access
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
 
-              {teachers.length === 0 && !loading && (
-                <div className="p-8 text-center text-gray-500">
-                  No adult ustaadhs registered
-                </div>
-              )}
-            </div>
-          </>
-        )}
-        <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
-          Note: Editing a Ustaadh will update their name/class for all associated learners.
-        </p>
-      </div>
+                {teachers.length === 0 && !loading && (
+                  <div className="p-8 text-center text-gray-500">
+                    No adult ustaadhs registered
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
+            Note: Editing a Ustaadh will update their name/class for all associated learners.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
