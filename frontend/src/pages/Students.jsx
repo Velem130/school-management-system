@@ -21,6 +21,7 @@ function Students() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [studentSearch, setStudentSearch] = useState(""); // NEW: Search state
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false); // PDF generation state
   // Transfer modal states
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [studentToTransfer, setStudentToTransfer] = useState(null);
@@ -457,6 +458,162 @@ function Students() {
     s.cell?.toLowerCase().includes(studentSearch.toLowerCase())
   );
 
+  // Sort alphabetically by name (for PDF)
+  const sortedStudents = [...filteredStudents].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  );
+
+  // Calculate gender counts (for PDF)
+  const maleCount = sortedStudents.filter(s => s.gender === 'Male').length;
+  const femaleCount = sortedStudents.filter(s => s.gender === 'Female').length;
+
+  // Generate PDF function - COMPACT DESIGN
+  const generatePDF = async () => {
+    setIsGeneratingPDF(true);
+
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageWidth = 297;
+      const ITEMS_FIRST_PAGE = 28;
+      const ITEMS_OTHER_PAGES = 38;
+
+      // Calculate total pages
+      let totalPages = 1;
+      if (sortedStudents.length > ITEMS_FIRST_PAGE) {
+        totalPages = 1 + Math.ceil((sortedStudents.length - ITEMS_FIRST_PAGE) / ITEMS_OTHER_PAGES);
+      }
+
+      for (let pageNum = 0; pageNum < totalPages; pageNum++) {
+        const startIdx = pageNum === 0
+          ? 0
+          : ITEMS_FIRST_PAGE + (pageNum - 1) * ITEMS_OTHER_PAGES;
+        const endIdx = pageNum === 0
+          ? Math.min(ITEMS_FIRST_PAGE, sortedStudents.length)
+          : Math.min(startIdx + ITEMS_OTHER_PAGES, sortedStudents.length);
+        const pageStudents = sortedStudents.slice(startIdx, endIdx);
+
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.position = 'absolute';
+        pdfContainer.style.left = '-9999px';
+        pdfContainer.style.width = '297mm';
+        pdfContainer.style.padding = '5mm 10mm';
+        pdfContainer.style.backgroundColor = 'white';
+        pdfContainer.style.fontFamily = 'Arial, sans-serif';
+        pdfContainer.style.color = '#000';
+
+        pdfContainer.innerHTML = `
+          <div style="width: 100%; max-width: 277mm; margin: 0 auto;">
+
+            ${pageNum === 0 ? `
+              <!-- Compact Header -->
+              <div style="border-bottom: 2px solid #000; padding-bottom: 3px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                  <h1 style="margin: 0; font-size: 16px; font-weight: bold; color: #000;">BBIC Management — Class Roster</h1>
+                  <p style="margin: 2px 0 0 0; font-size: 10px; color: #000;">
+                    Teacher: <strong>${currentTeacher.name}</strong> &nbsp;|&nbsp;
+                    Class: <strong>${currentTeacher.classTeaching}</strong> &nbsp;|&nbsp;
+                    Total: <strong>${sortedStudents.length}</strong> &nbsp;|&nbsp;
+                    Male: <strong>${maleCount}</strong> &nbsp;|&nbsp;
+                    Female: <strong>${femaleCount}</strong> &nbsp;|&nbsp;
+                    Date: <strong>${new Date().toLocaleDateString()}</strong>
+                  </p>
+                </div>
+                <p style="margin: 0; font-size: 9px; color: #555;">Page 1 of ${totalPages}</p>
+              </div>
+            ` : `
+              <!-- Subsequent page mini header -->
+              <div style="border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                <p style="margin: 0; font-size: 9px; color: #000;"><strong>${currentTeacher.name}</strong> — ${currentTeacher.classTeaching} (continued)</p>
+                <p style="margin: 0; font-size: 9px; color: #555;">Page ${pageNum + 1} of ${totalPages}</p>
+              </div>
+            `}
+
+            <!-- Students Table -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed;">
+              <thead>
+                <tr style="background: #000; color: #fff;">
+                  <th style="width: 4%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">#</th>
+                  <th style="width: 10%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">ID Number</th>
+                  <th style="width: 22%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Student Name</th>
+                  <th style="width: 7%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">Gender</th>
+                  <th style="width: 9%;  padding: 4px 3px; text-align: left;   border: 1px solid #000;">Date Joined</th>
+                  <th style="width: 14%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Home Location</th>
+                  <th style="width: 14%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Madrassa</th>
+                  <th style="width: 6%;  padding: 4px 3px; text-align: center; border: 1px solid #000;">Shoe</th>
+                  <th style="width: 14%; padding: 4px 3px; text-align: left;   border: 1px solid #000;">Cell Number</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pageStudents.map((student, index) => {
+                  const globalIndex = startIdx + index + 1;
+                  const rowBg = globalIndex % 2 === 0 ? '#f2f2f2' : '#ffffff';
+                  return `
+                    <tr style="background: ${rowBg};">
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${globalIndex}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.studentId || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; font-weight: 600;">${student.name || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${student.gender || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.dateJoined || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.location || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.madrassaLocation || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${student.shoeSize || '-'}</td>
+                      <td style="padding: 3px; border: 1px solid #ccc;">${student.cell || '-'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+
+            ${pageNum === totalPages - 1 ? `
+              <p style="margin-top: 6px; font-size: 8px; color: #555; text-align: right;">
+                End of roster — ${sortedStudents.length} student(s) total
+              </p>
+            ` : ''}
+
+          </div>
+        `;
+
+        document.body.appendChild(pdfContainer);
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const canvas = await html2canvas(pdfContainer, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          windowWidth: 1200
+        });
+
+        document.body.removeChild(pdfContainer);
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        if (pageNum > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      }
+
+      const fileName = `${currentTeacher.name.replace(/\s+/g, '_')}_Class_${currentTeacher.classTeaching}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+
+      alert('PDF generated successfully!');
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   const selectExistingTeacher = (teacher) => {
     setCurrentTeacher(teacher);
     setIsNewTeacher(false);
@@ -666,8 +823,33 @@ function Students() {
           <div className="bg-white rounded-xl shadow-sm p-5 sm:p-6 mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
               <h2 className="font-semibold text-lg sm:text-xl">{currentTeacher.name}'s Students</h2>
-              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
-                {loading ? "Loading..." : `Total: ${myStudents.length} students`}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
+                  {loading ? "Loading..." : `Total: ${myStudents.length} students`}
+                </div>
+                {/* PDF Download Button */}
+                <button
+                  onClick={generatePDF}
+                  disabled={isGeneratingPDF || loading || sortedStudents.length === 0}
+                  className="flex items-center gap-2 bg-purple-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-medium"
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <svg className="animate-spin h-3 w-3 sm:h-4 sm:w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download PDF
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
