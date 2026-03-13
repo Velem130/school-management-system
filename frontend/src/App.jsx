@@ -15,12 +15,15 @@ import AdultClasses from "./pages/AdultClasses";
 import MenList from "./pages/MenList";
 import ExcludedKids from "./pages/ExcludedKids";
 import StudentsPDF from "./pages/StudentsPDF";
+import StudentDistribution from "./pages/StudentDistribution";
+import AdultDistribution from "./pages/AdultDistribution";
+import MenDistribution from "./pages/MenDistribution"; // <--- NEW
 
 function App() {
   return (
     /* This main wrapper now handles the side-by-side layout */
     <div className="bg-gray-50 min-h-screen flex flex-col lg:flex-row">
-      
+
       {/* 1. The Sidebar (Stays on top for mobile, moves to left for laptop) */}
       <Sidebar />
 
@@ -41,6 +44,9 @@ function App() {
           <Route path="/ustaads" element={<Ustaads />} />
           <Route path="/adult-classes" element={<AdultClasses />} />
           <Route path="/menlist" element={<MenList />} />
+          <Route path="/distributions" element={<StudentDistribution />} />
+          <Route path="/adult-distributions" element={<AdultDistribution />} />
+          <Route path="/men-distributions" element={<MenDistribution />} /> {/* <--- NEW */}
           <Route path="/excluded-kids" element={<ExcludedKids />} />
           <Route path="/students-pdf" element={<StudentsPDF />} />
         </Routes>

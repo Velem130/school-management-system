@@ -8,14 +8,16 @@ function Sidebar() {
   const toggleSidebar = () => setIsOpen(!isOpen);
   const closeSidebar = () => setIsOpen(false);
 
-  // Added the PDF link to this array
   const links = [
     { path: "/", label: "Dashboard" },
     { path: "/students", label: "Student Roll" },
     { path: "/ustaads", label: "Ustaads" },
     { path: "/adult-classes", label: "Ladies Classes" },
     { path: "/menlist", label: "Community's List" },
-    { path: "/students-pdf", label: "Download PDF" } // <--- Added this line
+    { path: "/distributions", label: "Tick Students" },
+    { path: "/adult-distributions", label: "Tick Ladies" },
+    { path: "/men-distributions", label: "Tick Community" }, // <--- NEW
+    { path: "/students-pdf", label: "Download PDF" }
   ];
 
   return (
